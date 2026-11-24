@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.0
+Version 0.2.1
 
 ## What this plugin does
 
@@ -59,7 +59,7 @@ Each tester can use a different demo account at the same time. Everyone sees the
   - Tools › Boxing Canada Portal › **Download backup** exports the whole portal as JSON. It contains personal and medical information, so store it securely.
   - Hosting backups of the database are still needed.
 - **Restoring:** **Restore a backup** replaces all portal data with a backup file.
-- **Updating the plugin:** upload the new zip. Data is kept.
+- **Updates:** the plugin updates itself from the GitHub releases of BoxingCanadaAdmin/boxing_canada_portal (see section 7). Data is kept. You can still update by hand by uploading a new zip.
 - **Deleting the plugin:** data is kept. To remove it completely, delete the two `wp_bcp_` tables after taking a backup.
 
 ## 4. How it works (for a developer taking over)
@@ -155,3 +155,40 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
 - **Private files** are stored in `wp-content/uploads/bcp-private/`. They are blocked on Apache by an `.htaccess` file. On nginx, add a `location` rule that denies that folder. Include the folder in backups: the portal's JSON backup contains file records but not the files themselves.
 - **Upload size:** the limit is the smaller of 20 MB and PHP's `upload_max_filesize` and `post_max_size`. Set both to at least 20M. Videos should be shared as links.
 - **Never store card details.** The portal records only the Square order number and amount.
+
+## 7. Updates from GitHub (new in 0.2.1)
+
+### How sites update
+
+- **Where updates come from:** the plugin checks the GitHub releases of BoxingCanadaAdmin/boxing_canada_portal, not wordpress.org.
+- **What sites see:** a new release shows up under **Dashboard › Updates** and **Plugins**, with its release notes under "View details".
+- **Settings** are in **Tools › Boxing Canada Portal › Updates**:
+  - **Install new releases automatically** is on by default. WordPress checks twice a day and installs in the background, using real cron if the host provides it.
+  - **Also install pre-releases** is for the test site only. Pre-releases have tags like `v0.3.0-beta.1`.
+  - **Check GitHub now** checks straight away.
+- **What an update keeps:** portal data is untouched. Data changes that come with a release (for example a new pathway structure) run on the next page load.
+- **Private repository:** the repository is public today. If it becomes private, add this line to `wp-config.php` on each site, with a fine-grained GitHub token that has read-only "Contents" access to the repository:
+
+  ```
+  define( 'BCP_GITHUB_TOKEN', 'github_pat_...' );
+  ```
+- **One-time manual step:** sites running 0.2.0 or earlier don't have the updater yet. Upload the 0.2.1 zip once by hand; every later release then arrives automatically.
+
+### Publishing a release
+
+1. On a branch, run `scripts/bump-version.sh 0.3.0`. Commit it with the changes (including the compiled `plugin/` files from `npm run build`), and merge the pull request into `main`.
+2. On GitHub, go to **Releases › Draft a new release**:
+   - Choose a new tag `v0.3.0` (it must match the version), targeting `main`.
+   - Click **Generate release notes**.
+   - Click **Publish release**.
+3. The **Release** workflow runs within a minute. It:
+   - checks that the tag matches the plugin version;
+   - checks the PHP syntax;
+   - rebuilds the interface and confirms it matches what's committed;
+   - attaches `boxing-canada-portal.zip` to the release.
+
+   Sites install the release only once the zip is attached. If the workflow fails, the release stays without a zip and no site updates: see the **Actions** tab for the reason.
+4. **Test first:** tick **Set as a pre-release** to try a release on the test site before the live portal gets it. Only sites with **Also install pre-releases** turned on install it. When it's ready, edit the release, untick pre-release, and save.
+5. **Rebuild a zip:** to rebuild the zip for an existing release, go to **Actions › Release › Run workflow** and enter its tag.
+
+**Rolling back:** download the previous release's zip from GitHub and upload it under **Plugins › Add New › Upload Plugin**, choosing **Replace current with uploaded**. Turn off automatic updates until the fix is released.

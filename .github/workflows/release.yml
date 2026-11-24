@@ -1,0 +1,71 @@
+# Builds boxing-canada-portal.zip and attaches it to a GitHub release.
+#
+# Runs when a release is published (Releases › Draft a new release › choose a
+# tag such as v0.3.0 on main › Publish). Portals pick up the release as a
+# WordPress update once the zip is attached, usually a few minutes later.
+# Releases marked "Set as a pre-release" are only installed by sites that
+# follow pre-releases (a test site).
+#
+# To rebuild the zip for an existing release: Actions › Release › Run workflow,
+# and enter its tag.
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build and attach the zip to (for example v0.2.1)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Check the tag matches the plugin version
+        run: |
+          WANT="${TAG#v}"
+          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E 's/.*Version:\s*//')
+          CONST=$(grep -m1 "define( 'BCP_VERSION'" plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E "s/.*'BCP_VERSION', '([^']+)'.*/\1/")
+          echo "tag=$TAG header=$HEADER constant=$CONST"
+          if [ "$WANT" != "$HEADER" ] || [ "$WANT" != "$CONST" ]; then
+            echo "::error::Release $TAG points at code whose plugin version is $HEADER. Run scripts/bump-version.sh ${WANT}, merge it to main, and create the release from that commit."
+            exit 1
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: none
+
+      - name: Check PHP syntax
+        run: find plugin -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build the interface and check it matches what's committed
+        working-directory: source
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          git diff --exit-code -- ../plugin || (echo "::error::The compiled interface in plugin/ is out of date. Run npm run build in source/ and commit." && exit 1)
+
+      - name: Build the plugin zip
+        run: scripts/build-zip.sh
+
+      - name: Attach the zip to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" dist/boxing-canada-portal.zip --clobber

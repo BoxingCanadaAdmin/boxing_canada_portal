@@ -9,7 +9,8 @@ Membership tools for Boxing Canada: the Boxing Canada National Portal, delivered
 | `plugin/boxing-canada-portal/` | The WordPress plugin, ready to zip and install, including the compiled interface. `INSTALL.md` inside is the installation and operation guide. |
 | `source/` | The interface source (`portal-app.jsx`, React) and `coach-pathway.json`, the starting coaching pathway. `npm run build` compiles them into the plugin. |
 | `tests/` | Server-rule tests and a browser walkthrough of the coach evaluation flow, run against a throwaway WordPress site. |
-| `scripts/` | `build-zip.sh` makes the installable zip. |
+| `scripts/` | `build-zip.sh` makes the installable zip; `bump-version.sh` sets the plugin version for a release. |
+| `.github/workflows/` | `release.yml` publishes a release when a version tag is pushed; `ci.yml` checks pull requests. |
 
 ## Build
 
@@ -37,6 +38,17 @@ python3 tests/ui_test.py     # needs Playwright: walks the evaluation flow as ad
 
 - **Login throttle:** both tests reset the demo data. The portal locks an account after 8 sign-ins in 15 minutes, so running the tests repeatedly can lock the demo accounts. To clear the lock: `php tests/wpcli.php 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE \"_transient%bcp_login%\"");'`
 - **Screenshots** go to `tests/screenshots/`.
+
+## Release
+
+Sites running the plugin update themselves from this repository's GitHub releases.
+
+1. Bump the version with `scripts/bump-version.sh X.Y.Z` and merge the change to `main`.
+2. On GitHub, publish a release with the new tag `vX.Y.Z` on `main`.
+
+The **Release** workflow then checks and builds the plugin, and attaches `boxing-canada-portal.zip` to the release. Releases marked as pre-releases are only installed by test sites. The **CI** workflow runs the same checks on every pull request.
+
+Details are in section 7 of [`INSTALL.md`](plugin/boxing-canada-portal/INSTALL.md).
 
 ## Install
 
