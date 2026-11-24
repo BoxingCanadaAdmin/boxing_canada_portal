@@ -1,0 +1,372 @@
+{
+  "schema": 2,
+  "program": {
+    "id": "prog-coach",
+    "kind": "coach",
+    "name": "NCCP Coaching Pathway",
+    "nameFr": "Parcours d’entraîneur du PNCE",
+    "evaluationsEnabled": true,
+    "requestUrl": "https://boxing-canada.square.site/product/coach-evaluation-request-demande-d-valuation-de-l-entra-neur/22",
+    "coachingPage": "https://boxingcanada.org/coaching/"
+  },
+  "levels": [
+    {
+      "id": "lv-ci",
+      "code": "CLI",
+      "name": "Club Instructor",
+      "nameFr": "Instructeur de club",
+      "renames": [],
+      "aliases": ["Club Instructor", "Club-Level Instructor", "Instructeur de club", "CLI"],
+      "lockerContext": "",
+      "offeredFrom": "2027-01-01",
+      "evaluated": false,
+      "fee": 50,
+      "description": "Leads a group of participants through a class or workout. 4-hour online course; certification is the eLearning module’s online test in The Locker.",
+      "descriptionFr": "Dirige un groupe de participants pendant un cours ou un entraînement. Cours en ligne de 4 heures; la certification est le test en ligne du module dans le Casier.",
+      "pathwayUrl": "https://boxingcanada.org/coaching/",
+      "reqs": [
+        { "id": "cli-member", "stage": "start", "kind": "membership", "label": "Boxing Canada membership", "labelFr": "Être membre actuel de Boxe Canada", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "cli-course", "stage": "start", "kind": "event", "match": "Club Instructor|Instructeur de club", "noEval": true, "label": "Club Instructor eLearning course", "labelFr": "Cours en ligne Instructeur de club" }
+      ],
+      "tasks": []
+    },
+    {
+      "id": "lv-cc",
+      "code": "IB",
+      "name": "Instruction Beginner",
+      "nameFr": "Instruction Débutant",
+      "renames": [{ "from": "2027-01-01", "code": "CLC", "name": "Club-Level Coach", "nameFr": "Entraîneur de club" }],
+      "aliases": ["Instruction Beginner", "Instruction Beginners", "Instructor Beginner", "Instruction-Beginners", "Instruction - Beginners", "Inst-Beg", "Instruction Débutant", "Instruction Débutants", "Instructeur débutant", "Club-Level Coach", "Club Level Coach", "Entraîneur de club"],
+      "lockerContext": "Inst-Beg",
+      "offeredFrom": "",
+      "evaluated": true,
+      "fee": 180,
+      "description": "Instructs a boxing class. 14-hour Instruction Beginner course plus NCCP Multi-Sport modules; evaluated remotely or in person.",
+      "descriptionFr": "Enseigne un cours de boxe. Cours Instruction Débutant de 14 heures et modules multisports du PNCE; évaluation à distance ou en personne.",
+      "pathwayUrl": "https://boxingcanada.org/coaching/#intro",
+      "reqs": [
+        { "id": "ib-pre-check", "stage": "start", "kind": "trackie", "field": "DATE OF CRIMINAL RECORD CHECK", "optional": true, "label": "Police records check (needed to coach, not for the evaluation)", "labelFr": "Vérification des antécédents judiciaires (requise pour entraîner, pas pour l’évaluation)", "link": "https://pages.sterlingbackcheck.ca/landing-pages/c/cac_cant_find_your_sport/" },
+        { "id": "ib-pre-ss", "stage": "start", "kind": "module", "match": "Safe Sport Training|Sécurité dans le sport|Respect in Sport", "optional": true, "label": "NCCP Safe Sport Training (needed to coach, not for the evaluation)", "labelFr": "Formation sur la sécurité dans le sport du PNCE (requise pour entraîner, pas pour l’évaluation)", "link": "https://thelocker.coach.ca/onlinelearning#SS-DAC-E" },
+        { "id": "ib-member", "stage": "start", "kind": "membership", "label": "Boxing Canada membership", "labelFr": "Être membre actuel de Boxe Canada", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "ib-nccp", "stage": "start", "kind": "nccp", "label": "National Coach Certification (NCCP) number", "labelFr": "Numéro d’entraîneur du PNCE", "link": "https://thelocker.coach.ca/account/login?mode=login" },
+        { "id": "ib-course", "stage": "start", "kind": "event", "context": "Inst-Beg", "match": "Instruction - Beginner|Instruction Beginner|Instruction - Débutant|Instruction Débutant|Club-Level Coach", "anyInContext": true, "noEval": true, "onMissing": "challenge", "label": "Boxing Instruction Beginner module (course)", "labelFr": "Module Instruction Débutant de boxe (cours)", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "ib-med", "stage": "training", "kind": "module", "match": "Make Ethical Decisions|Making Ethical Decisions|Prise de décisions éthiques|Prendre des décisions éthiques", "label": "NCCP Make Ethical Decisions", "labelFr": "PNCE Prendre des décisions éthiques", "link": "https://coach.ca/nccp-make-ethical-decisions", "linkFr": "https://coach.ca/fr/prise-de-decisions-ethiques-pde" },
+        { "id": "ib-plan", "stage": "training", "kind": "module", "match": "Planning a Practice|Planning A Practice|Planification d’une séance|Planification d'une séance|Planifier une pratique", "label": "NCCP Planning a Practice", "labelFr": "PNCE Planifier une pratique", "link": "https://coach.ca/nccp-planning-practice", "linkFr": "https://coach.ca/fr/planification-dune-seance-dentrainement" },
+        { "id": "ib-nutr", "stage": "training", "kind": "module", "match": "Nutrition", "label": "NCCP Nutrition", "labelFr": "PNCE Nutrition", "link": "https://coach.ca/nccp-sport-nutrition", "linkFr": "https://coach.ca/fr/nutrition-sportive-du-pnce" },
+        { "id": "ib-eap", "stage": "training", "kind": "module", "match": "Emergency Action Plan|Plan d’action d’urgence|Plan d'action d'urgence", "label": "NCCP Emergency Action Plan", "labelFr": "PNCE Plan d’action d’urgence", "link": "https://coach.ca/module/nccp-emergency-action-plan", "linkFr": "https://coach.ca/fr/module/plan-daction-durgence-pnce" },
+        { "id": "ib-mhw", "stage": "training", "kind": "module", "match": "Making Head Way|tête d’avance|tête d'avance", "optional": true, "label": "Suggested: NCCP Making Headway in Sport", "labelFr": "Proposé : Prendre une tête d’avance en sport", "link": "https://coach.ca/nccp-making-head-way-sport", "linkFr": "https://coach.ca/fr/prendre-une-tete-davance-en-sport" },
+        { "id": "ib-medeval", "stage": "evaluation", "kind": "module", "match": "Ethical Decisions Online Evaluation|Ethical Decisions Evaluation|Ethical Decisions - Evaluation|Ethical Decisions - Online Evaluation|décisions éthiques - évaluation|Évaluation en ligne pour prise de décisions éthiques", "label": "NCCP Make Ethical Decisions online evaluation", "labelFr": "PNCE Prise de décisions éthiques : évaluation en ligne", "link": "https://thelocker.coach.ca/onlinelearning#MED", "linkFr": "https://lecasier.coach.ca/onlinelearning" }
+      ],
+      "tasks": [
+        {
+          "id": "ib-9a", "step": "9a",
+          "title": "Analyze the Performance of Boxers Executing Basic Skills",
+          "titleFr": "Analyser la performance des boxeurs exécutant les compétences de base",
+          "what": "Watch the three videos your evaluator assigned. For each one, name the skill, list the aspects that need improvement, and say what the boxer should do and how you would help them improve. Fill in the form below, or upload a photo of the completed template.",
+          "whatFr": "Regardez les trois vidéos assignées par votre évaluateur. Pour chacune, nommez la compétence, indiquez les aspects à améliorer, et ce que le boxeur devrait faire et comment vous l’aideriez. Remplissez le formulaire ci-dessous ou téléversez une photo du modèle rempli.",
+          "how": "Use the template in Appendix G, pages 39-41 of the IB Evaluation Package.",
+          "howFr": "Utilisez le modèle de l’annexe G, pages 39 à 41 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Video numbers assigned to the coach (1-22), for example 1, 7, 16",
+          "submit": ["form", "file", "text"],
+          "form": { "kind": "table", "repeat": 3, "repeatLabel": "Performance analysis", "repeatLabelFr": "Analyse de la performance",
+            "fields": [ { "key": "video", "label": "Video #", "labelFr": "Vidéo no" }, { "key": "skill", "label": "Name of skill", "labelFr": "Nom de la compétence" } ],
+            "columns": [ { "key": "detect", "label": "Detection: aspects of the performance that need improvement", "labelFr": "Détection : aspects de la performance à améliorer" }, { "key": "correct", "label": "Corrective measures: what should the participant do, and how?", "labelFr": "Mesures correctives : que doit faire le participant, et comment?" } ],
+            "minRows": 1 },
+          "resources": [
+            { "label": "Videos to analyze", "labelFr": "Vidéos à analyser", "url": "https://www.youtube.com/playlist?list=PLyPBt7hYcCxgw0M7p2oGhZscnmIJGoziB" },
+            { "label": "Template (Appendix G)", "labelFr": "Modèle (annexe G)", "url": "https://drive.google.com/file/d/1MLHs624nixyfaWUhZHlsld-AgRRofC4i/view" },
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ib-9b", "step": "9b",
+          "title": "Group Coaching: Warm-up",
+          "titleFr": "Coaching de groupe : échauffement",
+          "what": "Video yourself leading a warm-up of at least 5 minutes. The camera must show and hear you coaching. Include a written plan: show it on a white or chalk board at the start of the video, or fill in the plan below.",
+          "whatFr": "Enregistrez-vous en vidéo lors d’un échauffement d’au moins 5 minutes. La caméra doit vous voir et vous entendre. Incluez un plan écrit : montrez-le sur un tableau au début de la vidéo, ou remplissez le plan ci-dessous.",
+          "how": "You will be evaluated using the criteria on pages 25-28 of the IB Evaluation Package.",
+          "howFr": "Vous serez évalué selon les critères des pages 25 à 28 du dossier d’évaluation de l’IB.",
+          "requireVideo": true,
+          "submit": ["link", "file", "form", "text"],
+          "form": { "kind": "table", "repeat": 1, "repeatLabel": "Warm-up plan", "repeatLabelFr": "Plan d’échauffement", "optional": true,
+            "fields": [],
+            "columns": [ { "key": "activity", "label": "Activity", "labelFr": "Activité" }, { "key": "duration", "label": "Duration", "labelFr": "Durée" }, { "key": "goal", "label": "Goal / why?", "labelFr": "But / pourquoi?" } ],
+            "minRows": 3 },
+          "resources": [
+            { "label": "Evaluation criteria", "labelFr": "Critères d’évaluation", "url": "https://drive.google.com/file/d/1TUz-iQTaXRCbrG8ubk8GhlcLgbdm7cFR/view" },
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ib-9c", "step": "9c",
+          "title": "One-on-one teaching of a basic skill",
+          "titleFr": "Enseignement individuel d’une compétence de base",
+          "what": "Video yourself teaching the skill your evaluator assigned. The video should be long enough to meet the criteria on pages 29-30 of the IB Evaluation Package.",
+          "whatFr": "Enregistrez-vous en vidéo en train d’enseigner la compétence assignée par l’évaluateur. La vidéo doit être assez longue pour répondre aux critères des pages 29 et 30 du dossier d’évaluation de l’IB.",
+          "how": "Demonstrate the process in Appendix E, pages 31-32 of the IB Evaluation Package.",
+          "howFr": "Suivez le processus de l’annexe E, pages 31 et 32 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Skill assigned to the coach",
+          "requireVideo": true,
+          "submit": ["link", "file", "text"],
+          "resources": [
+            { "label": "The process to demonstrate", "labelFr": "Le processus à démontrer", "url": "https://drive.google.com/file/d/1gHxW5jFer9FDDPFs9zcmJv3o79zLQdsm/view" },
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ib-9d", "step": "9d",
+          "title": "One-on-one teaching of a defensive move",
+          "titleFr": "Enseignement individuel d’un mouvement défensif",
+          "what": "Video yourself teaching the defensive move your evaluator assigned. The video should be long enough to meet the criteria on pages 29-30 of the IB Evaluation Package.",
+          "whatFr": "Enregistrez-vous en vidéo en train d’enseigner le mouvement défensif assigné par l’évaluateur. La vidéo doit être assez longue pour répondre aux critères des pages 29 et 30 du dossier d’évaluation de l’IB.",
+          "how": "Demonstrate the process in Appendix E, pages 31-32 of the IB Evaluation Package.",
+          "howFr": "Suivez le processus de l’annexe E, pages 31 et 32 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Defensive move assigned to the coach",
+          "requireVideo": true,
+          "submit": ["link", "file", "text"],
+          "resources": [
+            { "label": "The process to demonstrate", "labelFr": "Le processus à démontrer", "url": "https://drive.google.com/file/d/1gHxW5jFer9FDDPFs9zcmJv3o79zLQdsm/view" },
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lv-pc",
+      "code": "CI",
+      "name": "Competition Introduction",
+      "nameFr": "Compétition Introduction",
+      "renames": [{ "from": "2027-01-01", "code": "PLC", "name": "Provincial-Level Coach", "nameFr": "Entraîneur au niveau provincial" }],
+      "aliases": ["Competition Introduction", "Competition Intro", "Competition-Introduction", "Competition - Introduction", "Comp-Int", "Introduction to Competition", "Compétition Introduction", "Introduction à la compétition", "Provincial-Level Coach", "Provincial Level Coach", "Entraîneur au niveau provincial"],
+      "lockerContext": "Comp-Int",
+      "offeredFrom": "",
+      "evaluated": true,
+      "fee": 180,
+      "description": "Coaches an entry-level competitive athlete. 16-hour Competition Introduction course plus NCCP Multi-Sport modules; evaluated remotely or in person.",
+      "descriptionFr": "Entraîne un athlète débutant en compétition. Cours Compétition Introduction de 16 heures et modules multisports du PNCE; évaluation à distance ou en personne.",
+      "pathwayUrl": "https://boxingcanada.org/coaching/#compintro",
+      "reqs": [
+        { "id": "ci-pre-check", "stage": "start", "kind": "trackie", "field": "DATE OF CRIMINAL RECORD CHECK", "optional": true, "label": "Police records check (needed to coach, not for the evaluation)", "labelFr": "Vérification des antécédents judiciaires (requise pour entraîner, pas pour l’évaluation)", "link": "https://pages.sterlingbackcheck.ca/landing-pages/c/cac_cant_find_your_sport/" },
+        { "id": "ci-pre-ss", "stage": "start", "kind": "module", "match": "Safe Sport Training|Sécurité dans le sport|Respect in Sport|Canadian Safe Sport", "optional": true, "label": "Canadian Safe Sport Program (needed to coach, not for the evaluation)", "labelFr": "Programme canadien de sport sécuritaire (requis pour entraîner, pas pour l’évaluation)", "link": "https://thelocker.coach.ca/onlinelearning#SS-DAC-E" },
+        { "id": "ci-member", "stage": "start", "kind": "membership", "label": "Boxing Canada membership", "labelFr": "Être membre actuel de Boxe Canada", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "ci-nccp", "stage": "start", "kind": "nccp", "label": "National Coach Certification (NCCP) number", "labelFr": "Numéro d’entraîneur du PNCE", "link": "https://thelocker.coach.ca/account/login?mode=login" },
+        { "id": "ci-prereq", "stage": "start", "kind": "cert", "levelId": "lv-cc", "allowManual": true, "label": "Instruction Beginner “Certified”, or 2 years’ experience as a boxing coach or instructor", "labelFr": "Instruction Débutant « certifié », ou 2 ans d’expérience comme entraîneur ou instructeur de boxe" },
+        { "id": "ci-course", "stage": "start", "kind": "event", "context": "Comp-Int", "match": "Introduction to Competition|Competition Introduction|Competition - Introduction|Compétition Introduction|Provincial-Level Coach", "anyInContext": true, "noEval": true, "onMissing": "challenge", "label": "Boxing Competition Introduction module (course)", "labelFr": "Module Compétition Introduction de boxe (cours)", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "ci-med", "stage": "training", "kind": "module", "match": "Make Ethical Decisions|Making Ethical Decisions|Prise de décisions éthiques|Prendre des décisions éthiques", "label": "NCCP Make Ethical Decisions", "labelFr": "PNCE Prendre des décisions éthiques", "link": "https://coach.ca/nccp-make-ethical-decisions", "linkFr": "https://coach.ca/fr/prise-de-decisions-ethiques-pde" },
+        { "id": "ci-tl", "stage": "training", "kind": "module", "match": "Teaching and Learning|Enseignement et apprentissage", "label": "NCCP Teaching and Learning", "labelFr": "PNCE Enseignement et apprentissage", "link": "https://coach.ca/nccp-teaching-and-learning", "linkFr": "https://coach.ca/fr/enseignement-et-apprentissage" },
+        { "id": "ci-plan", "stage": "training", "kind": "module", "match": "Planning a Practice|Planning A Practice|Planification d’une séance|Planification d'une séance", "label": "NCCP Planning a Practice", "labelFr": "PNCE Planification d’une séance d’entraînement", "link": "https://coach.ca/nccp-planning-practice", "linkFr": "https://coach.ca/fr/planification-dune-seance-dentrainement" },
+        { "id": "ci-bms", "stage": "training", "kind": "module", "match": "Basic Mental Skills|Habiletés mentales de base", "label": "NCCP Basic Mental Skills", "labelFr": "PNCE Habiletés mentales de base", "link": "https://coach.ca/nccp-basic-mental-skills", "linkFr": "https://coach.ca/fr/habiletes-mentales-de-base" },
+        { "id": "ci-nutr", "stage": "training", "kind": "module", "match": "Nutrition", "label": "NCCP Nutrition", "labelFr": "PNCE Nutrition", "link": "https://coach.ca/nccp-sport-nutrition", "linkFr": "https://coach.ca/fr/nutrition-sportive-du-pnce" },
+        { "id": "ci-dbsp", "stage": "training", "kind": "module", "match": "Design a Basic Sport Program|Élaboration d’un programme sportif de base|Élaboration d'un programme sportif de base", "label": "NCCP Design a Basic Sport Program", "labelFr": "PNCE Élaboration d’un programme sportif de base", "link": "https://coach.ca/nccp-design-basic-sport-program", "linkFr": "https://coach.ca/fr/elaboration-dun-programme-sportif-de-base" },
+        { "id": "ci-mhw", "stage": "training", "kind": "module", "match": "Making Head Way|tête d’avance|tête d'avance", "optional": true, "label": "Suggested: NCCP Making Headway in Sport", "labelFr": "Proposé : Prendre une tête d’avance en sport", "link": "https://coach.ca/nccp-making-head-way-sport", "linkFr": "https://coach.ca/fr/prendre-une-tete-davance-en-sport" },
+        { "id": "ci-medeval", "stage": "evaluation", "kind": "module", "match": "Ethical Decisions Online Evaluation|Ethical Decisions Evaluation|Ethical Decisions - Evaluation|Ethical Decisions - Online Evaluation|décisions éthiques - évaluation|Évaluation en ligne pour prise de décisions éthiques", "label": "NCCP Make Ethical Decisions online evaluation", "labelFr": "PNCE Prise de décisions éthiques : évaluation en ligne", "link": "https://thelocker.coach.ca/onlinelearning#MED", "linkFr": "https://lecasier.coach.ca/onlinelearning" }
+      ],
+      "tasks": [
+        {
+          "id": "ci-12a", "step": "12a",
+          "title": "Analyze the Performance of Boxers Executing Basic Skills",
+          "titleFr": "Analyser la performance des boxeurs exécutant les compétences de base",
+          "what": "Watch the three videos your evaluator assigned. For each one, name the skill, list the aspects that need improvement, and say what the boxer should do and how you would help them improve. Fill in the form below, or upload a photo of the completed template.",
+          "whatFr": "Regardez les trois vidéos assignées par votre évaluateur. Pour chacune, nommez la compétence, indiquez les aspects à améliorer, et ce que le boxeur devrait faire et comment vous l’aideriez. Remplissez le formulaire ci-dessous ou téléversez une photo du modèle rempli.",
+          "how": "Use the template in Appendix G, pages 39-41 of the IB Evaluation Package.",
+          "howFr": "Utilisez le modèle de l’annexe G, pages 39 à 41 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Video numbers assigned to the coach (1-22), for example 1, 7, 16",
+          "submit": ["form", "file", "text"],
+          "form": { "kind": "table", "repeat": 3, "repeatLabel": "Performance analysis", "repeatLabelFr": "Analyse de la performance",
+            "fields": [ { "key": "video", "label": "Video #", "labelFr": "Vidéo no" }, { "key": "skill", "label": "Name of skill", "labelFr": "Nom de la compétence" } ],
+            "columns": [ { "key": "detect", "label": "Detection: aspects of the performance that need improvement", "labelFr": "Détection : aspects de la performance à améliorer" }, { "key": "correct", "label": "Corrective measures: what should the participant do, and how?", "labelFr": "Mesures correctives : que doit faire le participant, et comment?" } ],
+            "minRows": 1 },
+          "resources": [
+            { "label": "Videos to analyze", "labelFr": "Vidéos à analyser", "url": "https://drive.google.com/drive/folders/19C7dmeK7pfzgHXCAnDqy-y_hNW--6AK_" },
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ci-12b", "step": "12b",
+          "title": "Group Coaching: Warm-up",
+          "titleFr": "Coaching de groupe : échauffement",
+          "what": "Video yourself leading a warm-up of at least 5 minutes. The camera must show and hear you coaching. Include a written plan: show it on a white or chalk board at the start of the video, or fill in the plan below.",
+          "whatFr": "Enregistrez-vous en vidéo lors d’un échauffement d’au moins 5 minutes. La caméra doit vous voir et vous entendre. Incluez un plan écrit : montrez-le sur un tableau au début de la vidéo, ou remplissez le plan ci-dessous.",
+          "how": "You will be evaluated using the criteria on pages 25-28 of the IB Evaluation Package.",
+          "howFr": "Vous serez évalué selon les critères des pages 25 à 28 du dossier d’évaluation de l’IB.",
+          "requireVideo": true,
+          "submit": ["link", "file", "form", "text"],
+          "form": { "kind": "table", "repeat": 1, "repeatLabel": "Warm-up plan", "repeatLabelFr": "Plan d’échauffement", "optional": true,
+            "fields": [],
+            "columns": [ { "key": "activity", "label": "Activity", "labelFr": "Activité" }, { "key": "duration", "label": "Duration", "labelFr": "Durée" }, { "key": "goal", "label": "Goal / why?", "labelFr": "But / pourquoi?" } ],
+            "minRows": 3 },
+          "resources": [
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ci-12c", "step": "12c",
+          "title": "One-on-one teaching of a basic skill",
+          "titleFr": "Enseignement individuel d’une compétence de base",
+          "what": "Video yourself teaching the skill your evaluator assigned. The video should be long enough to meet the criteria on pages 29-30 of the IB Evaluation Package.",
+          "whatFr": "Enregistrez-vous en vidéo en train d’enseigner la compétence assignée par l’évaluateur. La vidéo doit être assez longue pour répondre aux critères des pages 29 et 30 du dossier d’évaluation de l’IB.",
+          "how": "Demonstrate the process in Appendix E, pages 31-32 of the IB Evaluation Package.",
+          "howFr": "Suivez le processus de l’annexe E, pages 31 et 32 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Skill assigned to the coach",
+          "requireVideo": true,
+          "submit": ["link", "file", "text"],
+          "resources": [
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ci-12d", "step": "12d",
+          "title": "One-on-one teaching of a defensive move",
+          "titleFr": "Enseignement individuel d’un mouvement défensif",
+          "what": "Video yourself teaching the defensive move your evaluator assigned. The video should be long enough to meet the criteria on pages 29-30 of the IB Evaluation Package.",
+          "whatFr": "Enregistrez-vous en vidéo en train d’enseigner le mouvement défensif assigné par l’évaluateur. La vidéo doit être assez longue pour répondre aux critères des pages 29 et 30 du dossier d’évaluation de l’IB.",
+          "how": "Demonstrate the process in Appendix E, pages 31-32 of the IB Evaluation Package.",
+          "howFr": "Suivez le processus de l’annexe E, pages 31 et 32 du dossier d’évaluation de l’IB.",
+          "assignable": true, "assignHint": "Defensive move assigned to the coach",
+          "requireVideo": true,
+          "submit": ["link", "file", "text"],
+          "resources": [
+            { "label": "IB Evaluation Package (EN)", "labelFr": "Dossier d’évaluation IB (anglais)", "url": "https://drive.google.com/file/d/1kl09YjnkoYFFra98wLmd89h45UYqjOqs/view" },
+            { "label": "IB Evaluation Package (FR)", "labelFr": "Dossier d’évaluation IB (français)", "url": "https://drive.google.com/file/d/1EvAUN72nd67XM_FGU_zLqYTk8jPc8_6W/view" }
+          ]
+        },
+        {
+          "id": "ci-13a", "step": "13a",
+          "title": "Plan a Practice",
+          "titleFr": "Planifier une séance d’entraînement",
+          "what": "Complete the template outlining a full boxing practice, then upload a photo or PDF of it (or type your plan below).",
+          "whatFr": "Remplissez le modèle décrivant un entraînement de boxe complet, puis téléversez une photo ou un PDF (ou tapez votre plan ci-dessous).",
+          "how": "Use the template in Appendix H, pages 56-62 of the CI Evaluation Package.",
+          "howFr": "Utilisez le modèle de l’annexe H, pages 56 à 62 du dossier d’évaluation de la CI.",
+          "submit": ["file", "text", "link"],
+          "resources": [
+            { "label": "CI Evaluation Package (EN)", "labelFr": "Dossier d’évaluation CI (anglais)", "url": "https://drive.google.com/file/d/11yUFqPjd25zM_ifrD1U56_LRSBfH_2Qv/view" },
+            { "label": "CI Evaluation Package (FR)", "labelFr": "Dossier d’évaluation CI (français)", "url": "https://drive.google.com/file/d/1Z-rTr460GU6k82DeNjAFXh764c1Kjj02/view" }
+          ]
+        },
+        {
+          "id": "ci-13b", "step": "13b",
+          "title": "Analyze the Performance of Boxers Executing Intermediate Skills and Tactics",
+          "titleFr": "Analyser la performance des boxeurs qui exécutent des compétences et des tactiques intermédiaires",
+          "what": "Video your boxer performing two skills and share the videos. Give feedback using one template per skill: fill in the form below, or upload photos of the templates.",
+          "whatFr": "Filmez votre boxeur en train d’exécuter deux techniques et partagez les vidéos. Donnez votre avis avec un modèle par technique : remplissez le formulaire ci-dessous ou téléversez des photos des modèles.",
+          "how": "Use the template in Appendix G, pages 49-55 of the CI Evaluation Package.",
+          "howFr": "Utilisez le modèle de l’annexe G, pages 49 à 55 du dossier d’évaluation de la CI.",
+          "requireVideo": true,
+          "submit": ["link", "file", "form", "text"],
+          "form": { "kind": "table", "repeat": 2, "repeatLabel": "Skill", "repeatLabelFr": "Technique",
+            "fields": [ { "key": "skill", "label": "Skill or tactic", "labelFr": "Technique ou tactique" } ],
+            "columns": [ { "key": "detect", "label": "Detection: aspects of the performance that need improvement", "labelFr": "Détection : aspects de la performance à améliorer" }, { "key": "correct", "label": "Corrective measures: what should the boxer do, and how?", "labelFr": "Mesures correctives : que doit faire le boxeur, et comment?" } ],
+            "minRows": 1 },
+          "resources": [
+            { "label": "CI Evaluation Package (EN)", "labelFr": "Dossier d’évaluation CI (anglais)", "url": "https://drive.google.com/file/d/11yUFqPjd25zM_ifrD1U56_LRSBfH_2Qv/view" },
+            { "label": "CI Evaluation Package (FR)", "labelFr": "Dossier d’évaluation CI (français)", "url": "https://drive.google.com/file/d/1Z-rTr460GU6k82DeNjAFXh764c1Kjj02/view" }
+          ]
+        },
+        {
+          "id": "ci-13c", "step": "13c",
+          "title": "Provide support to a Boxer in Preparation for their First Fight",
+          "titleFr": "Soutenir un boxeur dans la préparation de son premier combat",
+          "what": "Complete the template assessing your athlete’s readiness, then upload a photo or PDF of it (or type your answers below).",
+          "whatFr": "Remplissez le modèle d’évaluation de l’état de préparation de l’athlète, puis téléversez une photo ou un PDF (ou tapez vos réponses ci-dessous).",
+          "how": "Use the template in Appendix I, pages 63-69 of the CI Evaluation Package.",
+          "howFr": "Utilisez le modèle de l’annexe I, pages 63 à 69 du dossier d’évaluation de la CI.",
+          "submit": ["file", "text", "link"],
+          "resources": [
+            { "label": "CI Evaluation Package (EN)", "labelFr": "Dossier d’évaluation CI (anglais)", "url": "https://drive.google.com/file/d/11yUFqPjd25zM_ifrD1U56_LRSBfH_2Qv/view" },
+            { "label": "CI Evaluation Package (FR)", "labelFr": "Dossier d’évaluation CI (français)", "url": "https://drive.google.com/file/d/1Z-rTr460GU6k82DeNjAFXh764c1Kjj02/view" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lv-ntc",
+      "code": "CD",
+      "name": "Competition Development",
+      "nameFr": "Compétition Développement",
+      "renames": [{ "from": "2027-01-01", "code": "NLC", "name": "National-Level Coach", "nameFr": "Entraîneur au niveau national" }],
+      "aliases": ["Competition Development", "Competition-Development", "Competition - Development", "Comp-Dev", "Compétition Développement", "Compétition Development", "National-Level Coach", "National Level Coach", "Entraîneur au niveau national"],
+      "lockerContext": "Comp-Dev",
+      "offeredFrom": "",
+      "evaluated": true,
+      "fee": 400,
+      "description": "Coaches athletes who plan to attend national-level competitions. 40+ hours of online courses; evaluated in person.",
+      "descriptionFr": "Entraîne des athlètes qui visent des compétitions de niveau national. Plus de 40 heures de cours en ligne; évaluation en personne.",
+      "pathwayUrl": "https://boxingcanada.org/coaching/#compdev",
+      "reqs": [
+        { "id": "cd-member", "stage": "start", "kind": "membership", "label": "Boxing Canada membership", "labelFr": "Être membre actuel de Boxe Canada", "link": "https://boxingcanada.org/about/#provinces" },
+        { "id": "cd-nccp", "stage": "start", "kind": "nccp", "label": "National Coach Certification (NCCP) number", "labelFr": "Numéro d’entraîneur du PNCE" },
+        { "id": "cd-prereq", "stage": "start", "kind": "cert", "levelId": "lv-pc", "label": "Competition Introduction “Certified”", "labelFr": "Compétition Introduction « certifié »" },
+        { "id": "cd-s1", "stage": "training", "kind": "event", "context": "Comp-Dev", "match": "Series 1 -", "label": "Demands of Competitive Boxing (Series 1)", "labelFr": "Série 1" },
+        { "id": "cd-s2", "stage": "training", "kind": "event", "context": "Comp-Dev", "match": "Series 2 -", "label": "How to Win at Competitive Boxing (Series 2)", "labelFr": "Série 2" },
+        { "id": "cd-s3", "stage": "training", "kind": "event", "context": "Comp-Dev", "match": "Series 3 -", "label": "How to Analyse the Performance of Competitive Boxers (Series 3)", "labelFr": "Série 3" },
+        { "id": "cd-psy", "stage": "training", "kind": "module", "match": "Psychology of Performance|Psychologie de la performance", "label": "NCCP Psychology of Performance", "labelFr": "PNCE Psychologie de la performance" },
+        { "id": "cd-mc", "stage": "training", "kind": "module", "match": "Managing Conflict|Gestion des conflits", "label": "NCCP Managing Conflict", "labelFr": "PNCE Gestion des conflits" },
+        { "id": "cd-cle", "stage": "training", "kind": "module", "match": "Coaching and Leading Effectively|Efficacité en entraînement", "label": "NCCP Coaching and Leading Effectively", "labelFr": "PNCE Efficacité en entraînement et en leadership" },
+        { "id": "cd-msp", "stage": "training", "kind": "module", "match": "Manage a Sport Program|Gestion d’un programme sportif|Gestion d'un programme sportif", "label": "NCCP Manage a Sport Program", "labelFr": "PNCE Gestion d’un programme sportif" },
+        { "id": "cd-pp", "stage": "training", "kind": "module", "match": "Performance Planning|Planification de la performance", "label": "NCCP Performance Planning", "labelFr": "PNCE Planification de la performance" },
+        { "id": "cd-app", "stage": "training", "kind": "module", "match": "Advanced Practice Planning|Planification avancée", "label": "NCCP Advanced Practice Planning", "labelFr": "PNCE Planification avancée d’une séance d’entraînement" },
+        { "id": "cd-pr", "stage": "training", "kind": "module", "match": "Prevention and Recovery|Prévention et récupération", "label": "NCCP Prevention and Recovery", "labelFr": "PNCE Prévention et récupération" },
+        { "id": "cd-daa", "stage": "training", "kind": "module", "match": "Developing Athletic Abilities|Développement des qualités athlétiques", "label": "NCCP Developing Athletic Abilities", "labelFr": "PNCE Développement des qualités athlétiques" },
+        { "id": "cd-ldfs", "stage": "training", "kind": "module", "match": "Leading Drug Free Sport|Diriger un sport sans dopage", "label": "NCCP Leading Drug Free Sport", "labelFr": "PNCE Diriger un sport sans dopage" },
+        { "id": "cd-mhw", "stage": "training", "kind": "module", "match": "Making Head Way|tête d’avance|tête d'avance", "label": "NCCP Making Headway in Sport", "labelFr": "PNCE Prendre une tête d’avance en sport" },
+        { "id": "cd-medeval", "stage": "evaluation", "kind": "module", "match": "Ethical Decisions Online Evaluation|Ethical Decisions Evaluation|Ethical Decisions - Evaluation|décisions éthiques - évaluation", "label": "NCCP Make Ethical Decisions online evaluation", "labelFr": "PNCE Prise de décisions éthiques : évaluation en ligne" },
+        { "id": "cd-mceval", "stage": "evaluation", "kind": "module", "match": "Managing Conflict Online Evaluation|Managing Conflict Evaluation|gestion des conflits - évaluation", "label": "NCCP Managing Conflict online evaluation", "labelFr": "PNCE Gestion des conflits : évaluation en ligne" },
+        { "id": "cd-ldfseval", "stage": "evaluation", "kind": "module", "match": "Leading Drug Free Sport Online Evaluation|Leading Drug Free Sport Evaluation|sans dopage - évaluation", "label": "NCCP Leading Drug Free Sport online evaluation", "labelFr": "PNCE Diriger un sport sans dopage : évaluation en ligne" },
+        { "id": "cd-paw", "stage": "evaluation", "kind": "event", "context": "Comp-Dev", "match": "Performance Analysis Workshop|Performance Analysis Evaluation|Atelier d'analyse de la performance|Atelier d’analyse de la performance", "label": "Performance Analysis Workshop", "labelFr": "Atelier d’analyse de la performance" }
+      ],
+      "tasks": [
+        { "id": "cd-10a", "step": "10a", "title": "Annual Program Design", "titleFr": "Plan annuel d’entraînement", "what": "Submit your annual program design for remote evaluation.", "whatFr": "Soumettez votre plan annuel d’entraînement pour une évaluation à distance.", "how": "Competition Development Evaluation Package.", "howFr": "Dossier d’évaluation Compétition Développement.", "submit": ["file", "link", "text"], "resources": [] },
+        { "id": "cd-10b", "step": "10b", "title": "Manage a Sport Program", "titleFr": "Gérer un programme sportif", "what": "Submit evidence of managing a sport program (for example a provincial camp or tour) for remote evaluation.", "whatFr": "Soumettez des preuves de la gestion d’un programme sportif (par exemple un camp ou une tournée provinciale).", "how": "Competition Development Evaluation Package.", "howFr": "Dossier d’évaluation Compétition Développement.", "submit": ["file", "link", "text"], "resources": [] },
+        { "id": "cd-10c", "step": "10c", "title": "Annual Program Components", "titleFr": "Macrocycle du programme annuel", "what": "Submit your annual program components for remote evaluation.", "whatFr": "Soumettez les composantes de votre programme annuel pour une évaluation à distance.", "how": "Competition Development Evaluation Package.", "howFr": "Dossier d’évaluation Compétition Développement.", "submit": ["file", "link", "text"], "resources": [] },
+        { "id": "cd-10d", "step": "10d", "title": "Support to Athletes in Training", "titleFr": "Soutien aux athlètes en entraînement", "what": "In-person evaluation at a training camp or daily training environment. Your evaluator records the result here.", "whatFr": "Évaluation en personne à un camp ou à l’entraînement. Votre évaluateur inscrit le résultat ici.", "how": "Competition Development Evaluation Package.", "howFr": "Dossier d’évaluation Compétition Développement.", "inPerson": true, "submit": ["text"], "resources": [] },
+        { "id": "cd-11a", "step": "11a", "title": "Support to Athletes in Competition", "titleFr": "Soutien aux athlètes en compétition", "what": "In-person evaluation at a nationally-sanctioned competition. Your evaluator records the result here.", "whatFr": "Évaluation en personne à une compétition sanctionnée à l’échelle nationale. Votre évaluateur inscrit le résultat ici.", "how": "Competition Development Evaluation Package, pages 12-17.", "howFr": "Dossier d’évaluation Compétition Développement, pages 12 à 17.", "inPerson": true, "submit": ["text"], "resources": [] }
+      ]
+    },
+    {
+      "id": "lv-ic",
+      "code": "ILC",
+      "name": "International-Level Coach",
+      "nameFr": "Entraîneur de niveau international",
+      "renames": [],
+      "aliases": ["International-Level Coach", "International Level Coach", "International Coach", "Entraîneur de niveau international", "Competition Development Advanced Gradation"],
+      "lockerContext": "Comp-Dev",
+      "offeredFrom": "2027-01-01",
+      "evaluated": true,
+      "fee": 400,
+      "description": "Leads athletes through multiple years of programs including international competitions. Competition Development with advanced gradation (4 more modules). Requirements and evaluation tasks to be confirmed.",
+      "descriptionFr": "Dirige des athlètes pendant plusieurs années, y compris en compétition internationale. Compétition Développement avec gradation avancée (4 modules de plus). Exigences et tâches d’évaluation à confirmer.",
+      "pathwayUrl": "https://boxingcanada.org/coaching/#compdev",
+      "reqs": [
+        { "id": "ilc-member", "stage": "start", "kind": "membership", "label": "Boxing Canada membership", "labelFr": "Être membre actuel de Boxe Canada" },
+        { "id": "ilc-prereq", "stage": "start", "kind": "cert", "levelId": "lv-ntc", "label": "Competition Development (National-Level Coach) “Certified”", "labelFr": "Compétition Développement (Entraîneur au niveau national) « certifié »" }
+      ],
+      "tasks": []
+    }
+  ],
+  "emailTemplates": {
+    "ready": {
+      "en": { "subject": "Boxing Canada {levelName} Coach Evaluation: {coachFirst}", "body": "{coachFirst},\n\nThank you for requesting an evaluation for {levelName}.\n\nI will be your evaluator. If you have any questions about the process, email me at {evaluatorEmail} or reply to this message. My goal is to get you through this process quickly, fairly, and with you feeling pumped about coaching!\n\nI’ve checked your NCCP record in The Locker and your membership. You’re ready to begin the evaluation{trackNote}. Below is the chart of every step to become a Certified {levelName} coach, with your status filled in (✓ done, ✗ needs attention). If you think anything is missing or incorrect, let me know and we’ll fix it.\n\n{chart}\n\nYOUR EVALUATION TASKS\n{tasks}\n\nSign in to the Boxing Canada portal to see each task, upload your videos and templates, and read my feedback: {portalUrl}\n\nThe full pathway is at {pathwayUrl}\n\n{evaluatorName}\nBoxing Canada Coach Evaluator" },
+      "fr": { "subject": "Évaluation d’entraîneur {levelName} de Boxe Canada : {coachFirst}", "body": "{coachFirst},\n\nMerci d’avoir demandé une évaluation pour {levelName}.\n\nJe serai votre évaluateur. Si vous avez des questions sur le processus, écrivez-moi à {evaluatorEmail} ou répondez à ce message. Mon objectif est que vous traversiez ce processus rapidement, équitablement et avec plein d’enthousiasme pour l’entraînement!\n\nJ’ai vérifié votre dossier du PNCE dans le Casier ainsi que votre adhésion. Vous êtes prêt à commencer l’évaluation{trackNote}. Voici le tableau de toutes les étapes pour devenir entraîneur {levelName} certifié, avec votre statut (✓ fait, ✗ à compléter). Si quelque chose vous semble manquant ou inexact, dites-le-moi et nous corrigerons.\n\n{chart}\n\nVOS TÂCHES D’ÉVALUATION\n{tasks}\n\nConnectez-vous au portail de Boxe Canada pour voir chaque tâche, téléverser vos vidéos et modèles, et lire mes commentaires : {portalUrl}\n\nLe parcours complet : {pathwayUrl}\n\n{evaluatorName}\nÉvaluateur d’entraîneurs, Boxe Canada" }
+    },
+    "outstanding": {
+      "en": { "subject": "Boxing Canada {levelName} Coach Evaluation: {coachFirst}, a few steps first", "body": "{coachFirst},\n\nThank you for requesting an evaluation for {levelName}. I will be your evaluator.\n\nI’ve checked your NCCP record in The Locker and your membership. Before we can start the evaluation tasks, these items need to be completed:\n\n{outstanding}\n\nBelow is the chart of every step to become a Certified {levelName} coach, with your status filled in (✓ done, ✗ needs attention). If you’ve already completed something marked ✗, it may not have reached The Locker yet: let me know and we’ll get it fixed up.\n\n{chart}\n\nWhen you’ve finished, reply to this email or sign in to the portal ({portalUrl}) and I’ll check again. Based on what I’ve documented, you are well on your way!\n\nThe full pathway is at {pathwayUrl}\n\n{evaluatorName}\nBoxing Canada Coach Evaluator" },
+      "fr": { "subject": "Évaluation d’entraîneur {levelName} de Boxe Canada : {coachFirst}, quelques étapes d’abord", "body": "{coachFirst},\n\nMerci d’avoir demandé une évaluation pour {levelName}. Je serai votre évaluateur.\n\nJ’ai vérifié votre dossier du PNCE dans le Casier ainsi que votre adhésion. Avant de commencer les tâches d’évaluation, ces éléments doivent être complétés :\n\n{outstanding}\n\nVoici le tableau de toutes les étapes pour devenir entraîneur {levelName} certifié, avec votre statut (✓ fait, ✗ à compléter). Si vous avez déjà complété un élément marqué ✗, il n’est peut-être pas encore inscrit au Casier : dites-le-moi et nous corrigerons.\n\n{chart}\n\nQuand ce sera fait, répondez à ce courriel ou connectez-vous au portail ({portalUrl}) et je vérifierai de nouveau. Vous êtes en bonne voie!\n\nLe parcours complet : {pathwayUrl}\n\n{evaluatorName}\nÉvaluateur d’entraîneurs, Boxe Canada" }
+    },
+    "outcome": {
+      "en": { "subject": "Boxing Canada {levelName} Coach Evaluation: {resultShort}", "body": "{coachFirst},\n\nI’ve reviewed all of your evaluation tasks for {levelName}.\n\n{result}\n\n{taskResults}\n\nFeedback:\n{feedback}\n\nWhat happens next:\n{nextSteps}\n\nIf you have any questions about the coaching system, don’t hesitate to email me at {evaluatorEmail}.\n\n{evaluatorName}\nBoxing Canada Coach Evaluator" },
+      "fr": { "subject": "Évaluation d’entraîneur {levelName} de Boxe Canada : {resultShort}", "body": "{coachFirst},\n\nJ’ai examiné toutes vos tâches d’évaluation pour {levelName}.\n\n{result}\n\n{taskResults}\n\nCommentaires :\n{feedback}\n\nProchaines étapes :\n{nextSteps}\n\nPour toute question sur le système d’entraînement, écrivez-moi à {evaluatorEmail}.\n\n{evaluatorName}\nÉvaluateur d’entraîneurs, Boxe Canada" }
+    },
+    "assigned": {
+      "en": { "subject": "New coach evaluation assigned: {coachName}, {levelName}", "body": "Hello {evaluatorName},\n\nBoxing Canada has assigned you a {levelName} evaluation{trackNote}.\n\nCoach: {coachName}\nNCCP #: {nccp}\nProvince: {province}\nSquare order: {orderNo}\n\nPlease check the coach’s NCCP history against the requirements and send them the “ready” or “outstanding items” email within 1 business day. Open the evaluation in the portal: {portalUrl}\n\nBoxing Canada Coach Development Team" },
+      "fr": { "subject": "Nouvelle évaluation d’entraîneur assignée : {coachName}, {levelName}", "body": "Bonjour {evaluatorName},\n\nBoxe Canada vous a assigné une évaluation {levelName}{trackNote}.\n\nEntraîneur : {coachName}\nNo PNCE : {nccp}\nProvince : {province}\nCommande Square : {orderNo}\n\nVeuillez vérifier l’historique PNCE de l’entraîneur par rapport aux exigences et lui envoyer le courriel « prêt » ou « éléments à compléter » d’ici 1 jour ouvrable. Ouvrez l’évaluation dans le portail : {portalUrl}\n\nÉquipe du développement des entraîneurs de Boxe Canada" }
+    }
+  }
+}

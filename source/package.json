@@ -1,0 +1,9 @@
+{
+  "name": "boxing-canada-portal-source",
+  "private": true,
+  "scripts": {
+    "build": "node build-js.js portal-app.jsx ../plugin/boxing-canada-portal/assets/js/portal-app.js coach-pathway.json && node -e \"require('fs').copyFileSync('coach-pathway.json','../plugin/boxing-canada-portal/data/coach-pathway.json')\" && tailwindcss -c tailwind.config.js -i input.css -o ../plugin/boxing-canada-portal/assets/css/portal.css --minify",
+    "seed": "node make-seed.js ../plugin/boxing-canada-portal/assets/js/portal-app.js ../plugin/boxing-canada-portal/data/demo-seed.json"
+  },
+  "devDependencies": { "typescript": "^5", "tailwindcss": "3.4.17" }
+}
