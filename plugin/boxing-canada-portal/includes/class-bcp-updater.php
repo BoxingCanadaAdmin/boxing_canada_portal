@@ -11,6 +11,11 @@
  *
  * - Stable sites follow the latest full release; a test site can also follow
  *   pre-releases (tags such as v0.3.0-beta.1).
+ * - Managed hosts often switch WordPress's background updater off. When they
+ *   do, the plugin installs its own releases from a twice-daily scheduled
+ *   task (bcp_self_update), using WordPress's plugin upgrader and the same
+ *   lock as WordPress, so the two never run at once. The settings screen
+ *   shows what, if anything, blocks updates on the site.
  * - Public repository: no credentials needed. Private repository: define
  *   BCP_GITHUB_TOKEN in wp-config.php (a fine-grained token with read-only
  *   access to the repository's contents).
@@ -26,6 +31,8 @@ class BCP_Updater {
 	const ASSET     = 'boxing-canada-portal.zip';
 	const CACHE     = 'bcp_github_release';
 	const CACHE_TTL = 21600; // 6 hours.
+	const HOOK      = 'bcp_self_update';
+	const LOG       = 'bcp_self_update_log';
 
 	public static function init() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'inject' ) );
@@ -33,6 +40,142 @@ class BCP_Updater {
 		add_filter( 'upgrader_pre_download', array( __CLASS__, 'download' ), 10, 3 );
 		add_filter( 'auto_update_plugin', array( __CLASS__, 'auto' ), 10, 2 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'after_update' ), 10, 2 );
+		add_action( self::HOOK, array( __CLASS__, 'self_update' ) );
+		add_action( 'init', array( __CLASS__, 'schedule' ) );
+		add_filter( 'plugin_row_meta', array( __CLASS__, 'row_links' ), 10, 2 );
+		add_action( 'admin_post_bcp_updates', array( __CLASS__, 'row_action' ) );
+	}
+
+	/** "Check for updates | Auto-update: on (Turn off)" on the Plugins screen. */
+	public static function row_links( $links, $file ) {
+		if ( self::basename() !== $file || ! current_user_can( 'update_plugins' ) ) {
+			return $links;
+		}
+		$s   = BCP_Plugin::settings();
+		$on  = ! empty( $s['auto_update'] );
+		$url = function ( $do ) {
+			return wp_nonce_url( admin_url( 'admin-post.php?action=bcp_updates&do=' . $do ), 'bcp_updates' );
+		};
+		$links[] = '<a href="' . esc_url( $url( 'check' ) ) . '">Check for updates</a>';
+		$links[] = $on
+			? '<span style="color:#1d7a3a;font-weight:600">Auto-update: on</span> (<a href="' . esc_url( $url( 'auto_off' ) ) . '">Turn off</a>)'
+			: '<span style="font-weight:600">Auto-update: off</span> (<a href="' . esc_url( $url( 'auto_on' ) ) . '">Turn on</a>)';
+		return $links;
+	}
+
+	public static function row_action() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			wp_die( 'Not allowed.' );
+		}
+		check_admin_referer( 'bcp_updates' );
+		$do = isset( $_GET['do'] ) ? sanitize_key( $_GET['do'] ) : '';
+		if ( 'auto_on' === $do || 'auto_off' === $do ) {
+			BCP_Plugin::update_settings( array( 'auto_update' => 'auto_on' === $do ? 1 : 0 ) );
+		} else {
+			self::check_now();
+		}
+		wp_safe_redirect( admin_url( 'plugins.php' ) );
+		exit;
+	}
+
+	public static function schedule() {
+		if ( ! wp_next_scheduled( self::HOOK ) ) {
+			wp_schedule_event( time() + 15 * MINUTE_IN_SECONDS, 'twicedaily', self::HOOK );
+		}
+	}
+
+	private static function load_admin() {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/misc.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	}
+
+	/** Is WordPress's own background updater able to update this plugin? */
+	private static function core_can_auto_update() {
+		self::load_admin();
+		$u = new WP_Automatic_Updater();
+		if ( $u->is_disabled() || $u->is_vcs_checkout( WP_PLUGIN_DIR ) ) {
+			return false;
+		}
+		$item = (object) array( 'plugin' => self::basename(), 'slug' => 'boxing-canada-portal', 'new_version' => '999', 'package' => '' );
+		return (bool) apply_filters( 'auto_update_plugin', false, $item );
+	}
+
+	/**
+	 * What decides whether updates install on this site.
+	 *
+	 * @return array[] Each: [ state ok|warn|bad, text ].
+	 */
+	public static function diagnostics() {
+		self::load_admin();
+		$s   = BCP_Plugin::settings();
+		$out = array();
+		if ( ! wp_is_file_mod_allowed( 'automatic_updater' ) ) {
+			$out[] = array( 'bad', 'This site blocks all plugin installs and updates (DISALLOW_FILE_MODS or the host’s settings). Updates can’t install, automatically or by hand. Ask your host to allow plugin updates.' );
+			return $out;
+		}
+		$fs = get_filesystem_method( array(), WP_PLUGIN_DIR );
+		$out[] = 'direct' === $fs ? array( 'ok', 'WordPress can write plugin files directly.' ) : array( 'bad', 'WordPress needs FTP details to change plugin files (“' . $fs . '”), so updates can’t install in the background. Ask your host to set FS_METHOD to direct.' );
+		if ( empty( $s['auto_update'] ) ) {
+			$out[] = array( 'warn', 'Automatic updates are off in these settings: updates install only when you click Update.' );
+		} elseif ( self::core_can_auto_update() ) {
+			$out[] = array( 'ok', 'WordPress’s background updater will install portal releases.' );
+		} else {
+			$out[] = array( 'ok', 'WordPress’s background updater is switched off on this site (common on managed hosting), so the portal installs its own releases twice a day.' );
+		}
+		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+			$out[] = array( 'warn', 'WP-Cron is triggered by the host rather than by visits (DISABLE_WP_CRON). Most managed hosts run it every few minutes; if updates never arrive, ask your host whether wp-cron.php runs on a schedule.' );
+		}
+		$next = wp_next_scheduled( self::HOOK );
+		if ( ! empty( $s['auto_update'] ) && $next ) {
+			$out[] = array( 'ok', 'Next update check by the portal: ' . human_time_diff( $next ) . ( $next > time() ? ' from now.' : ' ago (waiting for WP-Cron to run).' ) );
+		}
+		$log = get_option( self::LOG );
+		if ( is_array( $log ) ) {
+			$out[] = array( $log['ok'] ? 'ok' : 'bad', ( $log['ok'] ? 'Last automatic update: ' : 'Last automatic update failed: ' ) . $log['from'] . ' → ' . $log['to'] . ', ' . human_time_diff( $log['at'] ) . ' ago' . ( $log['ok'] ? '.' : ': ' . $log['message'] ) );
+		}
+		return $out;
+	}
+
+	/**
+	 * Install a newer release without WordPress's background updater.
+	 * Runs from the scheduled task when automatic updates are on and WordPress
+	 * won't do it, or straight away from "Update now" on the settings screen.
+	 *
+	 * @return array|null What happened, or null when there was nothing to do.
+	 */
+	public static function self_update( $manual = false ) {
+		$s = BCP_Plugin::settings();
+		if ( ! $manual && ( empty( $s['auto_update'] ) || self::core_can_auto_update() ) ) {
+			return null;
+		}
+		self::load_admin();
+		$r = self::latest( (bool) $manual );
+		if ( ! $r || ! version_compare( $r['version'], BCP_VERSION, '>' ) || ! wp_is_file_mod_allowed( 'automatic_updater' ) ) {
+			return null;
+		}
+		$log = array( 'at' => time(), 'from' => BCP_VERSION, 'to' => $r['version'], 'ok' => false, 'message' => '' );
+		if ( 'direct' !== get_filesystem_method( array(), WP_PLUGIN_DIR ) ) {
+			$log['message'] = 'WordPress can’t write plugin files without FTP details.';
+		} elseif ( ! WP_Upgrader::create_lock( 'auto_updater', HOUR_IN_SECONDS ) ) {
+			return null; // WordPress or another request is updating right now.
+		} else {
+			// Make sure WordPress's list of updates includes this release.
+			set_site_transient( 'update_plugins', get_site_transient( 'update_plugins' ) ?: new stdClass() );
+			$was_active = is_plugin_active( self::basename() );
+			$up  = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
+			$res = $up->upgrade( self::basename() );
+			if ( $was_active && ! is_plugin_active( self::basename() ) ) {
+				activate_plugin( self::basename(), '', false, true );
+			}
+			WP_Upgrader::release_lock( 'auto_updater' );
+			$log['ok']      = true === $res;
+			$log['message'] = is_wp_error( $res ) ? $res->get_error_message() : ( true === $res ? '' : wp_strip_all_tags( implode( ' ', (array) $up->skin->get_upgrade_messages() ) ) );
+		}
+		update_option( self::LOG, $log, false );
+		BCP_REST::notify( 'role:nsoadmin', $log['ok'] ? "The portal was updated from {$log['from']} to {$log['to']}." : "The portal couldn’t update itself to {$log['to']}: {$log['message']} Update it under Dashboard › Updates.", 'DASHBOARD' );
+		return $log;
 	}
 
 	private static function basename() {

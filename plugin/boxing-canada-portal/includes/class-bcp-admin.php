@@ -122,6 +122,11 @@ class BCP_Admin {
 				$msg = 'Backup restored. Existing WordPress sign-in accounts stay linked to their members.';
 				break;
 
+			case 'update_now':
+				$log = BCP_Updater::self_update( true );
+				$msg = ! $log ? 'Nothing to install: you have the latest version (' . BCP_VERSION . '), or updates are blocked (see Updates below).' : ( $log['ok'] ? "Updated to {$log['to']}." : "The update failed: {$log['message']}" );
+				break;
+
 			case 'updates':
 				$was = BCP_Plugin::settings();
 				BCP_Plugin::update_settings( array( 'auto_update' => empty( $_POST['auto_update'] ) ? 0 : 1, 'update_prereleases' => empty( $_POST['update_prereleases'] ) ? 0 : 1 ) );
@@ -231,6 +236,14 @@ class BCP_Admin {
 			$upd .= '</p><table class="form-table"><tr><th>Automatic updates</th><td><label><input type="checkbox" name="auto_update" value="1"' . checked( $s['auto_update'], 1, false ) . '> Install new releases automatically</label><p class="description">WordPress checks twice a day and installs in the background. Portal data is kept; any data changes in a release run on the next page load. Take a backup before major releases.</p></td></tr>'
 				. '<tr><th>Pre-releases</th><td><label><input type="checkbox" name="update_prereleases" value="1"' . checked( $s['update_prereleases'], 1, false ) . '> Also install pre-releases (for a test site, not portal.boxingcanada.org)</label></td></tr>'
 				. '<tr><th></th><td><label><input type="checkbox" name="check_now" value="1" checked> Check GitHub now</label></td></tr></table>';
+			$diag = '<ul style="margin:0 0 1em">';
+			foreach ( BCP_Updater::diagnostics() as $d ) {
+				$diag .= '<li>' . array( 'ok' => '✅', 'warn' => '⚠️', 'bad' => '❌' )[ $d[0] ] . ' ' . esc_html( $d[1] ) . '</li>';
+			}
+			echo '<h3>How updates install on this site</h3>' . $diag . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts.
+			if ( $rel && version_compare( $rel['version'], BCP_VERSION, '>' ) ) {
+				$form( 'update_now', '<p>Version <strong>' . esc_html( $rel['version'] ) . '</strong> is available.</p>', 'Update now' );
+			}
 			$form( 'updates', $upd, 'Save update settings' );
 			?>
 
