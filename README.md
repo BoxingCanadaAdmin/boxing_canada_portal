@@ -34,10 +34,12 @@ tests/setup-wordpress.sh
 php -S localhost:8080 -t tests/.wordpress/site tests/router.php    # leave running
 python3 tests/api_test.py    # access rules for Square intake, shared evaluations and files
 python3 tests/ui_test.py     # needs Playwright: walks the evaluation flow as admin, evaluator and coach
+php tests/wpcli.php 'require "tests/parse_test.php";'   # reads the Square order emails in tests/fixtures
 ```
 
 - **Login throttle:** both tests reset the demo data. The portal locks an account after 8 sign-ins in 15 minutes, so running the tests repeatedly can lock the demo accounts. To clear the lock: `php tests/wpcli.php 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE \"_transient%bcp_login%\"");'`
 - **Screenshots** go to `tests/screenshots/`.
+- **Fixtures** in `tests/fixtures/` are made-up copies of real Square order layouts. Never commit real member details: this repository is public.
 
 ## Release
 

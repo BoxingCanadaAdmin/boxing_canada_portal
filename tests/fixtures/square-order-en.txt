@@ -1,0 +1,22 @@
+From: Boxing Canada <messenger@messaging.squareup.com>
+To: Boxing Canada <info@boxingcanada.org>
+Subject: Order #400000004 placed at Boxing Canada by Tyler Okafor
+
+You received an order!
+The customer placed order #400000004 on 26-11-06 at 09:12. Here's the summary:
+Order status
+$180.00
+#cd2E
+Coach Evaluation Request / Demande d'évaluation de l'entraîneur
+Remote evaluation for Instruction Beginner and Competition Introduction coaches. Évaluation à distance pour les entraîneurs des catégories…
+NCCP ID / Numéro PNCE: 6702215
+Instruction Beginner / débutant
+$180.00
+Total
+$180.00
+Visa 0000 (Keyed)
+Authorization code: 000000
+Order number: 400000004
+Tyler Okafor
+(780) 555-0144
+tyler.okafor@example.ca

@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
  * Update URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
  * Description:       The Boxing Canada National Portal: Digital Record Books, medical forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport. Add the [boxing_canada_portal] shortcode to a page, or use the page the plugin creates on activation.
- * Version:           0.2.4
+ * Version:           0.2.5
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            Boxing Canada
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BCP_VERSION', '0.2.4' );
+define( 'BCP_VERSION', '0.2.5' );
 define( 'BCP_DB_VERSION', '2' );
 define( 'BCP_FILE', __FILE__ );
 define( 'BCP_DIR', plugin_dir_path( __FILE__ ) );
@@ -51,6 +51,7 @@ class BCP_Plugin {
 			// Coach evaluations.
 			'intake_key'      => '',                       // Secret in the inbound-email webhook URL.
 			'intake_senders'  => 'squareup.com, square.site, boxingcanada.org',
+			'intake_product'  => 'Coach Evaluation Request|Demande d’évaluation de l’entraîneur|Demande d\'évaluation de l\'entraîneur', // Words that identify the evaluation product; | separates alternatives.
 			'eval_from_email' => '',                       // For example coach@boxingcanada.org (your SMTP service must allow it).
 			'eval_cc'         => 'coach@boxingcanada.org', // Copied on evaluation emails to coaches.
 			// Updates from the GitHub repository's releases.
