@@ -1,61 +1,82 @@
-# Builds boxing-canada-portal.zip and attaches it to a GitHub release.
+# Publishes plugin releases. Portals install a release once its zip is attached.
 #
-# Runs when a release is published (Releases › Draft a new release › choose a
-# tag such as v0.3.0 on main › Publish). Portals pick up the release as a
-# WordPress update once the zip is attached, usually a few minutes later.
-# Releases marked "Set as a pre-release" are only installed by sites that
-# follow pre-releases (a test site).
-#
-# To rebuild the zip for an existing release: Actions › Release › Run workflow,
-# and enter its tag.
+# - Automatically: when a change to plugin/ reaches main with a plugin version
+#   that has no release yet (scripts/bump-version.sh X.Y.Z), this creates
+#   release vX.Y.Z from that commit with boxing-canada-portal.zip attached.
+#   Versions with a hyphen (0.3.0-beta.1) become pre-releases, which only test
+#   sites install.
+# - By hand: a release published in GitHub's interface gets the zip attached,
+#   provided its tag matches the plugin version of the commit it points at.
+# - Rebuild: Actions › Release › Run workflow, with the release's tag.
 name: Release
 
 on:
+  push:
+    branches: [main]
+    paths: ['plugin/**', 'source/**']
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to build and attach the zip to (for example v0.2.1)'
+        description: 'Release tag to build and attach the zip to (for example v0.2.3)'
         required: true
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.sha }}
 
-      - name: Check the tag matches the plugin version
+      - name: Work out the release
+        id: rel
         run: |
-          WANT="${TAG#v}"
-          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E 's/.*Version:\s*//')
+          V=$(grep -m1 -E '^\s*\*\s*Version:' plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E 's/.*Version:\s*//')
           CONST=$(grep -m1 "define( 'BCP_VERSION'" plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E "s/.*'BCP_VERSION', '([^']+)'.*/\1/")
-          echo "tag=$TAG header=$HEADER constant=$CONST"
-          if [ "$WANT" != "$HEADER" ] || [ "$WANT" != "$CONST" ]; then
-            echo "::error::Release $TAG points at code whose plugin version is $HEADER. Run scripts/bump-version.sh ${WANT}, merge it to main, and create the release from that commit."
+          if [ "$V" != "$CONST" ]; then echo "::error::Plugin header says $V but BCP_VERSION says $CONST. Use scripts/bump-version.sh."; exit 1; fi
+          TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          MODE=upload
+          if [ -z "$TAG" ]; then
+            TAG="v$V"; MODE=create
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              echo "Release $TAG already exists: nothing to publish (bump the version to release)."
+              echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          elif [ "${TAG#v}" != "$V" ]; then
+            echo "::error::Release $TAG points at code whose plugin version is $V. Releases are published automatically when the version changes on main."
             exit 1
           fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"; echo "mode=$MODE" >> "$GITHUB_OUTPUT"; echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Release $TAG ($MODE)"
 
       - uses: shivammathur/setup-php@v2
+        if: steps.rel.outputs.skip != 'true'
         with:
           php-version: '8.1'
           tools: none
 
       - name: Check PHP syntax
+        if: steps.rel.outputs.skip != 'true'
         run: find plugin -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - uses: actions/setup-node@v4
+        if: steps.rel.outputs.skip != 'true'
         with:
           node-version: '22'
 
       - name: Build the interface and check it matches what's committed
+        if: steps.rel.outputs.skip != 'true'
         working-directory: source
         run: |
           npm install --no-audit --no-fund
@@ -63,9 +84,16 @@ jobs:
           git diff --exit-code -- ../plugin || (echo "::error::The compiled interface in plugin/ is out of date. Run npm run build in source/ and commit." && exit 1)
 
       - name: Build the plugin zip
+        if: steps.rel.outputs.skip != 'true'
         run: scripts/build-zip.sh
 
+      - name: Publish the release with the zip
+        if: steps.rel.outputs.skip != 'true' && steps.rel.outputs.mode == 'create'
+        run: |
+          TAG="${{ steps.rel.outputs.tag }}"
+          PRE=""; case "$TAG" in *-*) PRE="--prerelease" ;; esac
+          gh release create "$TAG" dist/boxing-canada-portal.zip --target "$GITHUB_SHA" --title "Boxing Canada Portal $TAG" --generate-notes $PRE
+
       - name: Attach the zip to the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" dist/boxing-canada-portal.zip --clobber
+        if: steps.rel.outputs.skip != 'true' && steps.rel.outputs.mode == 'upload'
+        run: gh release upload "${{ steps.rel.outputs.tag }}" dist/boxing-canada-portal.zip --clobber
