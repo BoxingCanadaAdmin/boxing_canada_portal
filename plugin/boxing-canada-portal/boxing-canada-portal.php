@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
  * Update URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
  * Description:       The Boxing Canada National Portal: Digital Record Books, medical forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport. Add the [boxing_canada_portal] shortcode to a page, or use the page the plugin creates on activation.
- * Version:           0.2.1
+ * Version:           0.2.2
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            Boxing Canada
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BCP_VERSION', '0.2.1' );
+define( 'BCP_VERSION', '0.2.2' );
 define( 'BCP_DB_VERSION', '2' );
 define( 'BCP_FILE', __FILE__ );
 define( 'BCP_DIR', plugin_dir_path( __FILE__ ) );
@@ -98,6 +98,7 @@ class BCP_Plugin {
 
 	public static function deactivate() {
 		wp_clear_scheduled_hook( 'bcp_daily' );
+		wp_clear_scheduled_hook( 'bcp_self_update' );
 	}
 
 	public static function init() {

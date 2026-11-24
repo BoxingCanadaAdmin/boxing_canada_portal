@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.1
+Version 0.2.2
 
 ## What this plugin does
 
@@ -166,6 +166,14 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
   - **Install new releases automatically** is on by default. WordPress checks twice a day and installs in the background, using real cron if the host provides it.
   - **Also install pre-releases** is for the test site only. Pre-releases have tags like `v0.3.0-beta.1`.
   - **Check GitHub now** checks straight away.
+- **Managed hosting:** many managed hosts switch WordPress's background updater off for plugins. When the background updater is off, the portal installs its own releases: a scheduled task checks twice a day and runs WordPress's plugin updater, using the same lock as WordPress so the two never run at the same time.
+  - Administrators get a portal notification after each update, or after a failure.
+  - **Update now** on the settings screen installs a waiting release straight away.
+  - Under **How updates install on this site**, the settings screen lists what applies to your site:
+    - plugin installs blocked entirely (`DISALLOW_FILE_MODS`): nothing can be installed, so the host has to allow plugin updates;
+    - FTP details needed to write files;
+    - WP-Cron run by the host rather than by visits;
+    - the result of the last update.
 - **What an update keeps:** portal data is untouched. Data changes that come with a release (for example a new pathway structure) run on the next page load.
 - **Private repository:** the repository is public today. If it becomes private, add this line to `wp-config.php` on each site, with a fine-grained GitHub token that has read-only "Contents" access to the repository:
 
