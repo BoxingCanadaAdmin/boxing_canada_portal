@@ -1,0 +1,29 @@
+# Checks every pull request: PHP syntax, and that the compiled interface in
+# plugin/ matches source/ (so a merged branch is always releasable).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: none
+      - name: Check PHP syntax
+        run: find plugin -name '*.php' -print0 | xargs -0 -n1 php -l
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the interface and check it matches what's committed
+        working-directory: source
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          git diff --exit-code -- ../plugin || (echo "::error::The compiled interface in plugin/ is out of date. Run npm run build in source/ and commit." && exit 1)

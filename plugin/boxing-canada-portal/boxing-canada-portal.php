@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name:       Boxing Canada Portal
- * Plugin URI:        https://boxingcanada.org/
+ * Plugin URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
+ * Update URI:        https://github.com/BoxingCanadaAdmin/boxing_canada_portal
  * Description:       The Boxing Canada National Portal: Digital Record Books, medical forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport. Add the [boxing_canada_portal] shortcode to a page, or use the page the plugin creates on activation.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            Boxing Canada
@@ -15,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BCP_VERSION', '0.2.0' );
+define( 'BCP_VERSION', '0.2.1' );
 define( 'BCP_DB_VERSION', '2' );
 define( 'BCP_FILE', __FILE__ );
 define( 'BCP_DIR', plugin_dir_path( __FILE__ ) );
@@ -28,6 +29,7 @@ require_once BCP_DIR . 'includes/class-bcp-access.php';
 require_once BCP_DIR . 'includes/class-bcp-accounts.php';
 require_once BCP_DIR . 'includes/class-bcp-rest.php';
 require_once BCP_DIR . 'includes/class-bcp-coach-eval.php';
+require_once BCP_DIR . 'includes/class-bcp-updater.php';
 require_once BCP_DIR . 'includes/class-bcp-frontend.php';
 require_once BCP_DIR . 'includes/class-bcp-admin.php';
 
@@ -51,6 +53,9 @@ class BCP_Plugin {
 			'intake_senders'  => 'squareup.com, square.site, boxingcanada.org',
 			'eval_from_email' => '',                       // For example coach@boxingcanada.org (your SMTP service must allow it).
 			'eval_cc'         => 'coach@boxingcanada.org', // Copied on evaluation emails to coaches.
+			// Updates from the GitHub repository's releases.
+			'auto_update'        => 1, // Install new releases automatically (WordPress checks twice a day).
+			'update_prereleases' => 0, // Also follow pre-releases (for a test site).
 		);
 	}
 
@@ -102,6 +107,7 @@ class BCP_Plugin {
 		}
 		BCP_REST::init();
 		BCP_Coach_Eval::init();
+		BCP_Updater::init();
 		BCP_Frontend::init();
 		BCP_Admin::init();
 		add_action( 'bcp_daily', array( 'BCP_Store', 'daily_maintenance' ) );

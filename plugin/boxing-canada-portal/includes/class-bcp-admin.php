@@ -122,6 +122,18 @@ class BCP_Admin {
 				$msg = 'Backup restored. Existing WordPress sign-in accounts stay linked to their members.';
 				break;
 
+			case 'updates':
+				$was = BCP_Plugin::settings();
+				BCP_Plugin::update_settings( array( 'auto_update' => empty( $_POST['auto_update'] ) ? 0 : 1, 'update_prereleases' => empty( $_POST['update_prereleases'] ) ? 0 : 1 ) );
+				if ( ! empty( $_POST['check_now'] ) || (int) $was['update_prereleases'] !== ( empty( $_POST['update_prereleases'] ) ? 0 : 1 ) ) {
+					$r   = BCP_Updater::check_now();
+					$st  = BCP_Updater::status();
+					$msg = $st['error'] ? 'Couldn’t check GitHub: ' . $st['error'] : ( $r && version_compare( $r['version'], BCP_VERSION, '>' ) ? "Version {$r['version']} is available. " . ( ! empty( $_POST['auto_update'] ) ? 'It will install automatically within 12 hours, or install it now under Dashboard › Updates.' : 'Install it under Dashboard › Updates.' ) : 'You have the latest version (' . BCP_VERSION . ').' );
+				} else {
+					$msg = 'Update settings saved.';
+				}
+				break;
+
 			case 'link_me':
 				$me  = wp_get_current_user();
 				$doc = BCP_Accounts::portal_user_for_wp( $me->ID );
@@ -206,6 +218,20 @@ class BCP_Admin {
 				. '<p>Sender name <input type="text" name="from_name" value="' . esc_attr( $s['from_name'] ) . '"></p></td></tr></table>',
 				'Save settings'
 			);
+			?>
+
+			<h2>Updates</h2>
+			<?php
+			$st  = BCP_Updater::status();
+			$rel = $st['release'];
+			$upd = '<p>Installed version: <strong>' . esc_html( BCP_VERSION ) . '</strong>. Updates come from the releases of <a href="https://github.com/' . esc_attr( BCP_Updater::REPO ) . '/releases" target="_blank">' . esc_html( BCP_Updater::REPO ) . '</a>.';
+			if ( $st['checked'] ) {
+				$upd .= ' Last checked ' . esc_html( human_time_diff( $st['checked'] ) ) . ' ago: ' . ( $st['error'] ? '<span style="color:#b32d2e">' . esc_html( $st['error'] ) . '</span>' : ( $rel ? 'latest release ' . esc_html( $rel['version'] ) . ( $rel['prerelease'] ? ' (pre-release)' : '' ) . ( version_compare( $rel['version'], BCP_VERSION, '>' ) ? ' <strong>is available</strong>' : '' ) : 'no releases yet' ) ) . '.';
+			}
+			$upd .= '</p><table class="form-table"><tr><th>Automatic updates</th><td><label><input type="checkbox" name="auto_update" value="1"' . checked( $s['auto_update'], 1, false ) . '> Install new releases automatically</label><p class="description">WordPress checks twice a day and installs in the background. Portal data is kept; any data changes in a release run on the next page load. Take a backup before major releases.</p></td></tr>'
+				. '<tr><th>Pre-releases</th><td><label><input type="checkbox" name="update_prereleases" value="1"' . checked( $s['update_prereleases'], 1, false ) . '> Also install pre-releases (for a test site, not portal.boxingcanada.org)</label></td></tr>'
+				. '<tr><th></th><td><label><input type="checkbox" name="check_now" value="1" checked> Check GitHub now</label></td></tr></table>';
+			$form( 'updates', $upd, 'Save update settings' );
 			?>
 
 			<h2>Your administrator account</h2>

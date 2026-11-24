@@ -1,0 +1,59 @@
+# Publishes a plugin release when a version tag is pushed (for example v0.3.0).
+# Portals running the plugin pick the release up as a WordPress update.
+# Tags with a hyphen (v0.3.0-beta.1) become pre-releases, which only sites with
+# "Also install pre-releases" turned on will install.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the plugin version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(grep -m1 -E '^\s*\*\s*Version:' plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E 's/.*Version:\s*//')
+          CONST=$(grep -m1 "define( 'BCP_VERSION'" plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E "s/.*'BCP_VERSION', '([^']+)'.*/\1/")
+          echo "tag=$TAG header=$HEADER constant=$CONST"
+          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$CONST" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match the plugin version ($HEADER / $CONST). Run scripts/bump-version.sh first."
+            exit 1
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: none
+
+      - name: Check PHP syntax
+        run: find plugin -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build the interface and check it matches what's committed
+        working-directory: source
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          git diff --exit-code -- ../plugin || (echo "::error::The compiled interface in plugin/ is out of date. Run npm run build in source/ and commit." && exit 1)
+
+      - name: Build the plugin zip
+        run: scripts/build-zip.sh
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRE=""
+          case "$GITHUB_REF_NAME" in *-*) PRE="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/boxing-canada-portal.zip --title "Boxing Canada Portal $GITHUB_REF_NAME" --generate-notes $PRE
