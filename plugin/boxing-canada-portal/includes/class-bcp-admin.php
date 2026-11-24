@@ -157,7 +157,8 @@ class BCP_Admin {
 				$cc   = sanitize_email( wp_unslash( isset( $_POST['eval_cc'] ) ? $_POST['eval_cc'] : '' ) );
 				$from = sanitize_email( wp_unslash( isset( $_POST['eval_from_email'] ) ? $_POST['eval_from_email'] : '' ) );
 				$doms = array_filter( array_map( function ( $d ) { return preg_replace( '/[^a-z0-9.\-]/', '', strtolower( trim( $d ) ) ); }, explode( ',', wp_unslash( isset( $_POST['intake_senders'] ) ? $_POST['intake_senders'] : '' ) ) ) );
-				$chg  = array( 'eval_cc' => $cc, 'eval_from_email' => $from, 'intake_senders' => implode( ', ', $doms ) );
+				$prod = sanitize_text_field( wp_unslash( isset( $_POST['intake_product'] ) ? $_POST['intake_product'] : '' ) );
+				$chg  = array( 'eval_cc' => $cc, 'eval_from_email' => $from, 'intake_senders' => implode( ', ', $doms ), 'intake_product' => $prod );
 				if ( ! empty( $_POST['new_key'] ) ) {
 					$chg['intake_key'] = wp_generate_password( 32, false );
 				}
@@ -274,12 +275,13 @@ class BCP_Admin {
 			?>
 
 			<h2 id="bcp-evaluations">Coach evaluations</h2>
-			<p>Square sends each evaluation order email to coach@boxingcanada.org. Forward those emails to an inbound-email service (Postmark, Mailgun or SendGrid) that posts them to the address below. The portal reads the coach’s name, NCCP # and level, matches the member, and adds the request to <strong>Coach Programs</strong> for an evaluator to be assigned. NSO administrators can also paste an order email in the portal.</p>
+			<p>Square sends each order email to info@boxingcanada.org. Forward those emails to an inbound-email service (Postmark, Mailgun or SendGrid) that posts them to the address below. The portal reads the coach’s name, NCCP # and level, matches the member, and adds the request to <strong>Coach Programs</strong> for an evaluator to be assigned. NSO administrators can also paste an order email in the portal.</p>
 			<?php
 			$form(
 				'evaluations',
 				'<table class="form-table"><tr><th>Inbound email address (webhook)</th><td><input type="text" readonly class="large-text code" value="' . esc_attr( BCP_Coach_Eval::intake_url() ) . '" onclick="this.select()"><p class="description">Keep this address private: anyone who has it can add orders for review. <label><input type="checkbox" name="new_key" value="1"> Make a new address</label></p></td></tr>'
 				. '<tr><th>Accept emails from</th><td><input type="text" class="regular-text" name="intake_senders" value="' . esc_attr( $s['intake_senders'] ) . '"><p class="description">Domains that must appear in the sender or the forwarded message. Other emails are kept for review without creating a request.</p></td></tr>'
+				. '<tr><th>Evaluation product name</th><td><input type="text" class="large-text" name="intake_product" value="' . esc_attr( $s['intake_product'] ) . '"><p class="description">Words that appear in the order email for the evaluation product; separate alternatives with |. Orders for other products (merchandise, memberships) are recorded but ignored. Update this if you rename the product in Square.</p></td></tr>'
 				. '<tr><th>Evaluation emails sent from</th><td><input type="email" class="regular-text" name="eval_from_email" value="' . esc_attr( $s['eval_from_email'] ) . '" placeholder="' . esc_attr( get_option( 'admin_email' ) ) . '"><p class="description">For example coach@boxingcanada.org. Your email-delivery (SMTP) service must be allowed to send from it. Replies go to the evaluator.</p></td></tr>'
 				. '<tr><th>Copy evaluation emails to</th><td><input type="email" class="regular-text" name="eval_cc" value="' . esc_attr( $s['eval_cc'] ) . '"></td></tr></table>',
 				'Save coach evaluation settings'

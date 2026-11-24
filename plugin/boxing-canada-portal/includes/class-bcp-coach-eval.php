@@ -3,7 +3,8 @@
  * Coach evaluations: Square order emails in, evaluation files, and the
  * server-side steps of an evaluation.
  *
- * - A Square order email for a coach evaluation reaches the portal through an
+ * - A Square order email for a coach evaluation (sent to info@boxingcanada.org,
+ *   in English or French) reaches the portal through an
  *   inbound-email service (Postmark, Mailgun or SendGrid) that forwards it to
  *   POST /wp-json/bcp/v1/intake/email?key=..., or an NSO administrator pastes
  *   it into the portal. The email is parsed, matched to a member by NCCP #,
@@ -317,6 +318,14 @@ class BCP_Coach_Eval {
 			}
 		}
 
+		// Other Square orders (merchandise, memberships…) are recorded but not reviewed.
+		if ( empty( $parsed['isEvaluation'] ) ) {
+			$intake['status']  = 'ignored';
+			$intake['notes'][] = 'Not a coach evaluation order (the email doesn’t mention the evaluation product). No request created.';
+			BCP_Store::put( 's_evalIntake', $id, $intake );
+			return array( 'intake' => $intake, 'request' => null );
+		}
+
 		// The same order twice (a resent or re-forwarded email).
 		foreach ( $all as $x ) {
 			$same = ( $intake['messageId'] && isset( $x['messageId'] ) && $x['messageId'] === $intake['messageId'] )
@@ -483,6 +492,12 @@ class BCP_Coach_Eval {
 			$out['lastName']  = sanitize_text_field( count( $bits ) > 1 ? array_pop( $bits ) : '' );
 			$out['firstName'] = sanitize_text_field( implode( ' ', $bits ) );
 		}
+		if ( ! $out['firstName'] && ! $out['lastName'] && preg_match( '/\b(?:by|par|from|de)\s+([^\d@<>]{2,60}?)\s*$/iu', trim( (string) $subject ), $m ) ) {
+			// Square's subject: "Order #123 placed at Boxing Canada by Name" / "Commande nº 123 passée chez Boxing Canada par Name".
+			$bits             = preg_split( '/\s+/', trim( $m[1] ) );
+			$out['lastName']  = sanitize_text_field( count( $bits ) > 1 ? array_pop( $bits ) : '' );
+			$out['firstName'] = sanitize_text_field( implode( ' ', $bits ) );
+		}
 		$out['fullName'] = trim( $out['firstName'] . ' ' . $out['lastName'] );
 
 		// Email: a labelled one first, otherwise the first that isn't Boxing Canada's or Square's.
@@ -521,17 +536,35 @@ class BCP_Coach_Eval {
 		$lv    = $label( '/(level|niveau|course|cours|evaluation for|evaluation level|option|variation|item|article)/' );
 		$found = self::find_level( $lv );
 		if ( ! $found ) {
-			$found = self::find_level( $plain );
+			// The chosen option is a line naming exactly one level ("Instruction Beginner / débutant").
+			// The product description names several levels, so lines that match more than one are skipped.
+			$best = null;
+			foreach ( $lines as $ln ) {
+				$ln = preg_replace( '#https?://\S+#', ' ', $ln );
+				if ( strlen( $ln ) > 160 ) {
+					continue;
+				}
+				$all = self::find_levels( $ln );
+				if ( 1 === count( $all ) && ( ! $best || strlen( $ln ) < $best[2] ) ) {
+					$best = array( $all[0][0], $all[0][1], strlen( $ln ) );
+				}
+			}
+			$found = $best;
 		}
 		if ( $found ) {
 			$out['levelId']   = $found[0];
 			$out['levelText'] = $found[1];
 		}
 
-		// Regular or Challenge evaluation (Square product option).
-		if ( preg_match( '/\bchallenge\b|\bd[ée]fi\b/iu', $plain ) ) {
-			$out['track'] = 'challenge';
+		// Regular or Challenge evaluation (Square product option): a short line, not the description.
+		foreach ( $lines as $ln ) {
+			if ( strlen( $ln ) <= 80 && preg_match( '/\bchallenge\b|\bd[ée]fi\b/iu', $ln ) ) {
+				$out['track'] = 'challenge';
+			}
 		}
+
+		// Is this a coach evaluation order at all (and not, say, merchandise)?
+		$out['isEvaluation'] = self::is_evaluation_order( $plain );
 
 		// Order number and amount.
 		if ( preg_match( '/(?:order|commande|receipt|re[çc]u)\s*(?:#|no\.?|number|num[ée]ro|n[°º])?\s*[:#]?\s*((?=[A-Z0-9\-]*\d)[A-Z0-9][A-Z0-9\-]{3,})/iu', $subject . "\n" . $text, $m ) ) {
@@ -541,6 +574,43 @@ class BCP_Coach_Eval {
 			$out['amount'] = (float) str_replace( ',', '.', $m[1] );
 		}
 		return $out;
+	}
+
+	/** Every distinct level named in the text: [ [ level id, matched text ], ... ]. */
+	private static function find_levels( $text ) {
+		$hay = ' ' . self::fold( $text ) . ' ';
+		$p   = self::program();
+		$out = array();
+		foreach ( (array) ( $p ? $p['levels'] : array() ) as $l ) {
+			$names = array_merge( array( $l['name'] ), isset( $l['nameFr'] ) ? array( $l['nameFr'] ) : array(), (array) ( isset( $l['aliases'] ) ? $l['aliases'] : array() ) );
+			foreach ( (array) ( isset( $l['renames'] ) ? $l['renames'] : array() ) as $r ) {
+				$names[] = $r['name'];
+				if ( ! empty( $r['nameFr'] ) ) {
+					$names[] = $r['nameFr'];
+				}
+			}
+			foreach ( $names as $n ) {
+				$f = self::fold( $n );
+				if ( strlen( $f ) >= 4 && false !== strpos( $hay, ' ' . $f . ' ' ) ) {
+					$out[ $l['id'] ] = array( $l['id'], $n );
+					break;
+				}
+			}
+		}
+		return array_values( $out );
+	}
+
+	/** Words that identify the evaluation product in an order email (Boxing Canada › Settings › Coach evaluations). */
+	public static function is_evaluation_order( $text ) {
+		$s    = BCP_Plugin::settings();
+		$hay  = ' ' . self::fold( $text ) . ' ';
+		$want = array_filter( array_map( 'trim', explode( '|', (string) $s['intake_product'] ) ) );
+		foreach ( $want as $w ) {
+			if ( '' !== self::fold( $w ) && false !== strpos( $hay, ' ' . self::fold( $w ) . ' ' ) ) {
+				return true;
+			}
+		}
+		return ! $want;
 	}
 
 	/** @return array|null [ level id, the text that matched ] */

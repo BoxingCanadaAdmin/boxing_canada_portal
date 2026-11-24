@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.4
+Version 0.2.5
 
 ## What this plugin does
 
@@ -108,7 +108,7 @@ Also required before go-live: a privacy review (PIPEDA, Québec Law 25) and an i
 
 ### How an evaluation flows
 
-1. **A coach pays in the Square store.** Square emails the order to coach@boxingcanada.org.
+1. **A coach pays in the Square store.** Square emails the order to info@boxingcanada.org, from messenger@messaging.squareup.com. The order shows the NCCP # the coach typed ("NCCP ID / Numéro PNCE") and the level they chose.
 2. **The order email reaches the portal.** A forwarding rule sends it to an inbound-email service, which posts it to the portal. The portal reads the coach's name, NCCP #, email, level, Regular or Challenge evaluation, order number and amount.
    - **Matched by NCCP #, then email:** the request appears under **Coach Programs › waiting for an evaluator**, and NSO administrators get a notification.
    - **No match, or the level can't be read:** the order waits under **Square evaluation orders** for an administrator to **Match to member** or **Dismiss**.
@@ -131,7 +131,10 @@ The server checks every change: coaches can change only their own work, evaluato
 
 1. In **Boxing Canada › Settings › Coach evaluations**, copy the **inbound email address (webhook)**. Keep it private.
 2. Create an inbound-email address with a service such as Postmark (Inbound stream), Mailgun (Routes) or SendGrid (Inbound Parse). Set its webhook to the address from step 1.
-3. In Microsoft 365, add a rule on coach@boxingcanada.org: messages from Square (squareup.com) whose subject mentions an order **redirect** to the service's inbound address.
+3. In Microsoft 365, add a rule on **info@boxingcanada.org**:
+   - **Conditions:** the sender address includes `messaging.squareup.com`, and the message body includes `Coach Evaluation Request`.
+   - **Action:** **Redirect** (not forward) to the service's inbound address, so the original sender is kept.
+   - Orders for other products are left alone. If one does arrive, the portal records it and ignores it (see **Evaluation product name** in the settings).
    - Microsoft 365 blocks automatic forwarding to outside addresses by default.
    - A Microsoft 365 administrator must allow it for this mailbox, in the outbound spam policy.
 4. Place a test order, or paste a real order email with **Add an order email**, then **Check how it reads**.

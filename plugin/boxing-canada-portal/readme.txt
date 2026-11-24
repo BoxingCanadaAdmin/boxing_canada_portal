@@ -2,7 +2,7 @@
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.4
+Stable tag: 0.2.5
 License: GPLv2 or later
 
 The Boxing Canada National Portal as a WordPress plugin: Digital Record Books, Annual Medicals, ringside checks, pre-bout forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport.
@@ -20,6 +20,9 @@ The portal runs full-screen on its own page (it does not use the theme), and kee
 Full instructions are in INSTALL.md inside the plugin folder.
 
 == Changelog ==
+
+= 0.2.5 =
+* Square order emails: tuned to Square's real layout (French and English). Reads the chosen level instead of the levels named in the product description, takes the buyer's name from the subject, and ignores orders for other products (new "Evaluation product name" setting).
 
 = 0.2.4 =
 * "Boxing Canada" in the WordPress sidebar, with a boxing glove icon: Settings (moved from Tools) and Open the portal. Old Tools links redirect.
