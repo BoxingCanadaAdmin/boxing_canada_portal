@@ -1,6 +1,7 @@
 <?php
 /**
- * Tools › Boxing Canada Portal: settings, data, backups and administrator accounts.
+ * Boxing Canada (WordPress sidebar, boxing glove icon): settings, coach evaluations,
+ * updates, administrator accounts, data and backups.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,15 +14,42 @@ class BCP_Admin {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_post_bcp_action', array( __CLASS__, 'handle' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( BCP_FILE ), array( __CLASS__, 'links' ) );
+		add_action( 'admin_init', array( __CLASS__, 'old_location' ) );
+		add_action( 'admin_footer', array( __CLASS__, 'portal_link_new_tab' ) );
+	}
+
+	public static function url( $args = array() ) {
+		return add_query_arg( array_merge( array( 'page' => 'bcp' ), $args ), admin_url( 'admin.php' ) );
+	}
+
+	/** The settings used to live under Tools: send old links and bookmarks to the new place. */
+	public static function old_location() {
+		global $pagenow;
+		if ( 'tools.php' === $pagenow && isset( $_GET['page'] ) && 'bcp' === $_GET['page'] ) {
+			wp_safe_redirect( self::url( isset( $_GET['bcp_msg'] ) ? array( 'bcp_msg' => rawurlencode( sanitize_text_field( wp_unslash( $_GET['bcp_msg'] ) ) ) ) : array() ) );
+			exit;
+		}
+	}
+
+	/** A boxing glove, drawn in one colour so WordPress can tint it to match the admin colour scheme. */
+	public static function icon() {
+		return 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( BCP_DIR . 'assets/img/glove.svg' ) );
+	}
+
+	/** "Open the portal" in the sidebar opens in a new tab. */
+	public static function portal_link_new_tab() {
+		echo "<script>document.querySelectorAll('#toplevel_page_bcp a[href^=\"http\"]').forEach(function(a){if(a.href.indexOf('wp-admin')<0){a.target='_blank';a.rel='noopener';}});</script>"; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	public static function links( $links ) {
-		array_unshift( $links, '<a href="' . esc_url( admin_url( 'tools.php?page=bcp' ) ) . '">Settings</a>' );
+		array_unshift( $links, '<a href="' . esc_url( self::url() ) . '">Settings</a>' );
 		return $links;
 	}
 
 	public static function menu() {
-		add_management_page( 'Boxing Canada Portal', 'Boxing Canada Portal', 'manage_options', 'bcp', array( __CLASS__, 'page' ) );
+		add_menu_page( 'Boxing Canada Portal', 'Boxing Canada', 'manage_options', 'bcp', array( __CLASS__, 'page' ), self::icon(), 3 );
+		add_submenu_page( 'bcp', 'Boxing Canada Portal', 'Settings', 'manage_options', 'bcp', array( __CLASS__, 'page' ) );
+		add_submenu_page( 'bcp', 'Open the portal', 'Open the portal ↗', 'manage_options', BCP_REST::portal_url() );
 	}
 
 	private static function seed_file() {
@@ -83,6 +111,7 @@ class BCP_Admin {
 				BCP_Accounts::delete_demo_logins();
 				BCP_Store::wipe();
 				BCP_Store::import_dataset( json_decode( file_get_contents( self::seed_file() ), true ) );
+				BCP_Coach_Eval::migrate();
 				$n = BCP_Accounts::create_demo_logins();
 				BCP_Plugin::update_settings( array( 'test_mode' => 1 ) );
 				$msg = "Demo data loaded (fictional people only). $n demo sign-in accounts use the password " . BCP_DEMO_PASSWORD . '. Test mode is on.';
@@ -96,6 +125,7 @@ class BCP_Admin {
 				BCP_Accounts::delete_demo_logins();
 				BCP_Store::wipe();
 				BCP_Store::import_dataset( self::empty_dataset() );
+				BCP_Coach_Eval::migrate();
 				$msg = 'The portal is now empty, apart from reference data such as the certification pathways. Next, link your WordPress account as an NSO Administrator below.';
 				break;
 
@@ -119,7 +149,20 @@ class BCP_Admin {
 				}
 				BCP_Store::wipe();
 				BCP_Store::import_dataset( $data );
+				BCP_Coach_Eval::migrate();
 				$msg = 'Backup restored. Existing WordPress sign-in accounts stay linked to their members.';
+				break;
+
+			case 'evaluations':
+				$cc   = sanitize_email( wp_unslash( isset( $_POST['eval_cc'] ) ? $_POST['eval_cc'] : '' ) );
+				$from = sanitize_email( wp_unslash( isset( $_POST['eval_from_email'] ) ? $_POST['eval_from_email'] : '' ) );
+				$doms = array_filter( array_map( function ( $d ) { return preg_replace( '/[^a-z0-9.\-]/', '', strtolower( trim( $d ) ) ); }, explode( ',', wp_unslash( isset( $_POST['intake_senders'] ) ? $_POST['intake_senders'] : '' ) ) ) );
+				$chg  = array( 'eval_cc' => $cc, 'eval_from_email' => $from, 'intake_senders' => implode( ', ', $doms ) );
+				if ( ! empty( $_POST['new_key'] ) ) {
+					$chg['intake_key'] = wp_generate_password( 32, false );
+				}
+				BCP_Plugin::update_settings( $chg );
+				$msg = ! empty( $_POST['new_key'] ) ? 'Saved. The inbound email address changed: update it in your inbound-email service.' : 'Coach evaluation settings saved.';
 				break;
 
 			case 'update_now':
@@ -180,7 +223,7 @@ class BCP_Admin {
 				$msg = "Linked {$wp->user_email} to {$doc['firstName']} {$doc['lastName']} ({$doc['membershipId']}).";
 				break;
 		}
-		wp_safe_redirect( add_query_arg( array( 'page' => 'bcp', 'bcp_msg' => rawurlencode( $msg ) ), admin_url( 'tools.php' ) ) );
+		wp_safe_redirect( self::url( array( 'bcp_msg' => rawurlencode( $msg ) ) ) );
 		exit;
 	}
 
@@ -200,7 +243,12 @@ class BCP_Admin {
 		$provinces = array( 'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT' );
 		?>
 		<div class="wrap">
-			<h1>Boxing Canada Portal</h1>
+			<h1><img src="<?php echo esc_url( BCP_URL . 'assets/img/icon.png' ); ?>" alt="" style="width:32px;height:32px;vertical-align:middle;margin-right:8px">Boxing Canada Portal</h1>
+			<p style="margin-top:0">
+				<?php foreach ( array( 'settings' => 'Settings', 'evaluations' => 'Coach evaluations', 'updates' => 'Updates', 'accounts' => 'Administrator accounts', 'data' => 'Data & backups' ) as $bcp_k => $bcp_l ) : ?>
+					<a href="#bcp-<?php echo esc_attr( $bcp_k ); ?>" class="button button-small"><?php echo esc_html( $bcp_l ); ?></a>
+				<?php endforeach; ?>
+			</p>
 			<?php if ( $msg ) : ?><div class="notice notice-info"><p><?php echo esc_html( $msg ); ?></p></div><?php endif; ?>
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank">Open the portal</a>
@@ -208,7 +256,7 @@ class BCP_Admin {
 				<?php if ( $s['test_mode'] ) : ?><strong style="color:#b32d2e">&nbsp; Test mode is on: fictional data only.</strong><?php endif; ?>
 			</p>
 
-			<h2>Settings</h2>
+			<h2 id="bcp-settings">Settings</h2>
 			<?php
 			$pages = get_pages();
 			$opts  = '';
@@ -225,7 +273,20 @@ class BCP_Admin {
 			);
 			?>
 
-			<h2>Updates</h2>
+			<h2 id="bcp-evaluations">Coach evaluations</h2>
+			<p>Square sends each evaluation order email to coach@boxingcanada.org. Forward those emails to an inbound-email service (Postmark, Mailgun or SendGrid) that posts them to the address below. The portal reads the coach’s name, NCCP # and level, matches the member, and adds the request to <strong>Coach Programs</strong> for an evaluator to be assigned. NSO administrators can also paste an order email in the portal.</p>
+			<?php
+			$form(
+				'evaluations',
+				'<table class="form-table"><tr><th>Inbound email address (webhook)</th><td><input type="text" readonly class="large-text code" value="' . esc_attr( BCP_Coach_Eval::intake_url() ) . '" onclick="this.select()"><p class="description">Keep this address private: anyone who has it can add orders for review. <label><input type="checkbox" name="new_key" value="1"> Make a new address</label></p></td></tr>'
+				. '<tr><th>Accept emails from</th><td><input type="text" class="regular-text" name="intake_senders" value="' . esc_attr( $s['intake_senders'] ) . '"><p class="description">Domains that must appear in the sender or the forwarded message. Other emails are kept for review without creating a request.</p></td></tr>'
+				. '<tr><th>Evaluation emails sent from</th><td><input type="email" class="regular-text" name="eval_from_email" value="' . esc_attr( $s['eval_from_email'] ) . '" placeholder="' . esc_attr( get_option( 'admin_email' ) ) . '"><p class="description">For example coach@boxingcanada.org. Your email-delivery (SMTP) service must be allowed to send from it. Replies go to the evaluator.</p></td></tr>'
+				. '<tr><th>Copy evaluation emails to</th><td><input type="email" class="regular-text" name="eval_cc" value="' . esc_attr( $s['eval_cc'] ) . '"></td></tr></table>',
+				'Save coach evaluation settings'
+			);
+			?>
+
+			<h2 id="bcp-updates">Updates</h2>
 			<?php
 			$st  = BCP_Updater::status();
 			$rel = $st['release'];
@@ -247,7 +308,7 @@ class BCP_Admin {
 			$form( 'updates', $upd, 'Save update settings' );
 			?>
 
-			<h2>Your administrator account</h2>
+			<h2 id="bcp-accounts">Your administrator account</h2>
 			<?php if ( $me ) : ?>
 				<p>Your WordPress account is linked to <strong><?php echo esc_html( $me['firstName'] . ' ' . $me['lastName'] ); ?></strong> (<?php echo esc_html( $me['membershipId'] ); ?>, <?php echo esc_html( $me['role'] ); ?>).</p>
 			<?php else : ?>
@@ -264,7 +325,7 @@ class BCP_Admin {
 			<h3>Link another WordPress user to a member</h3>
 			<?php $form( 'link_user', '<p><input name="wp_email" type="email" placeholder="WordPress user’s email" required> <input name="member" placeholder="Membership ID or member email" required></p>', 'Link', 'button' ); ?>
 
-			<h2>Data</h2>
+			<h2 id="bcp-data">Data</h2>
 			<p>Download a backup before any change below. Backups contain personal and medical information: store them securely.</p>
 			<?php $form( 'export', '', 'Download backup (JSON)', 'button' ); ?>
 			<table class="widefat" style="max-width:900px"><tbody>

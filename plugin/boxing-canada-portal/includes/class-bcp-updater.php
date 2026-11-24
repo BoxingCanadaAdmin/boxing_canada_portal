@@ -7,7 +7,7 @@
  * (tag vX.Y.Z) carries a boxing-canada-portal.zip built by the repository's
  * release workflow. The portal shows the update under Dashboard › Updates and
  * Plugins like any other, and installs it automatically when "Install updates
- * automatically" is on (Tools › Boxing Canada Portal).
+ * automatically" is on (Boxing Canada › Settings).
  *
  * - Stable sites follow the latest full release; a test site can also follow
  *   pre-releases (tags such as v0.3.0-beta.1).

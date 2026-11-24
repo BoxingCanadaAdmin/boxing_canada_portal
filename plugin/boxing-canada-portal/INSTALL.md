@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.3
+Version 0.2.4
 
 ## What this plugin does
 
@@ -24,7 +24,7 @@ The plugin turns a WordPress site into the Boxing Canada National Portal:
    - loads the fictional demo data;
    - creates demo sign-in accounts. The password for all of them is `Password123!`.
 4. Open `/portal/`. The sign-in page shows the demo account cards, and the "Quick role demo" bar lets testers switch roles.
-5. Settings and data tools are under **Tools › Boxing Canada Portal**.
+5. Settings and data tools are under **Boxing Canada › Settings**: the boxing glove in the WordPress sidebar, just below Dashboard. **Boxing Canada › Open the portal** opens the portal in a new tab.
 
 Each tester can use a different demo account at the same time. Everyone sees the same shared data, which refreshes every few seconds.
 
@@ -35,7 +35,7 @@ Each tester can use a different demo account at the same time. Everyone sees the
    - an SMTP or email-delivery plugin;
    - a two-factor sign-in plugin for administrators;
    - a backup plugin.
-3. In **Tools › Boxing Canada Portal**:
+3. In **Boxing Canada › Settings**:
    1. **Download backup** (habit worth forming).
    2. **Empty the portal.** This deletes the demo data and keeps reference data such as the certification pathways.
    3. **Untick Test mode**, tick **Make it this site's home page**, and save. The portal then uses today's date, and the demo cards and role switcher disappear.
@@ -56,7 +56,7 @@ Each tester can use a different demo account at the same time. Everyone sees the
 ## 3. Day-to-day operation
 
 - **Backups:**
-  - Tools › Boxing Canada Portal › **Download backup** exports the whole portal as JSON. It contains personal and medical information, so store it securely.
+  - Boxing Canada › Settings › **Download backup** exports the whole portal as JSON. It contains personal and medical information, so store it securely.
   - Hosting backups of the database are still needed.
 - **Restoring:** **Restore a backup** replaces all portal data with a backup file.
 - **Updates:** the plugin updates itself from the GitHub releases of BoxingCanadaAdmin/boxing_canada_portal (see section 7). Data is kept. You can still update by hand by uploading a new zip.
@@ -129,7 +129,7 @@ The server checks every change: coaches can change only their own work, evaluato
 
 ### Setting up the Square email intake
 
-1. In **Tools › Boxing Canada Portal › Coach evaluations**, copy the **inbound email address (webhook)**. Keep it private.
+1. In **Boxing Canada › Settings › Coach evaluations**, copy the **inbound email address (webhook)**. Keep it private.
 2. Create an inbound-email address with a service such as Postmark (Inbound stream), Mailgun (Routes) or SendGrid (Inbound Parse). Set its webhook to the address from step 1.
 3. In Microsoft 365, add a rule on coach@boxingcanada.org: messages from Square (squareup.com) whose subject mentions an order **redirect** to the service's inbound address.
    - Microsoft 365 blocks automatic forwarding to outside addresses by default.
@@ -162,7 +162,7 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
 
 - **Where updates come from:** the plugin checks the GitHub releases of BoxingCanadaAdmin/boxing_canada_portal, not wordpress.org.
 - **What sites see:** a new release shows up under **Dashboard › Updates** and **Plugins**, with its release notes under "View details".
-- **Settings** are in **Tools › Boxing Canada Portal › Updates**:
+- **Settings** are in **Boxing Canada › Settings › Updates**:
   - **Install new releases automatically** is on by default. WordPress checks twice a day and installs in the background, using real cron if the host provides it.
   - **Also install pre-releases** is for the test site only. Pre-releases have tags like `v0.3.0-beta.1`.
   - **Check GitHub now** checks straight away.
