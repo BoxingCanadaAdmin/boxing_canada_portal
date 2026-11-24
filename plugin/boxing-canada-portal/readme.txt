@@ -2,7 +2,7 @@
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: GPLv2 or later
 
 The Boxing Canada National Portal as a WordPress plugin: Digital Record Books, Annual Medicals, ringside checks, pre-bout forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport.
@@ -20,6 +20,9 @@ The portal runs full-screen on its own page (it does not use the theme), and kee
 Full instructions are in INSTALL.md inside the plugin folder.
 
 == Changelog ==
+
+= 0.2.3 =
+* Same as 0.2.2 (installs its own updates on managed hosting; Plugins-screen update links). The v0.2.2 release on GitHub was created before those changes were merged, so they ship as 0.2.3.
 
 = 0.2.2 =
 * Automatic updates also work on managed hosting that switches WordPress's background updater off: the portal installs its own releases twice a day. New "Update now" button and a list of what affects updates on the site.

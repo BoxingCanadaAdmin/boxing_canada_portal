@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.2
+Version 0.2.3
 
 ## What this plugin does
 
@@ -185,19 +185,20 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
 
 ### Publishing a release
 
-1. On a branch, run `scripts/bump-version.sh 0.3.0`. Commit it with the changes (including the compiled `plugin/` files from `npm run build`), and merge the pull request into `main`.
-2. On GitHub, go to **Releases › Draft a new release**:
-   - Choose a new tag `v0.3.0` (it must match the version), targeting `main`.
-   - Click **Generate release notes**.
-   - Click **Publish release**.
-3. The **Release** workflow runs within a minute. It:
-   - checks that the tag matches the plugin version;
-   - checks the PHP syntax;
-   - rebuilds the interface and confirms it matches what's committed;
-   - attaches `boxing-canada-portal.zip` to the release.
+Releases are published automatically:
 
-   Sites install the release only once the zip is attached. If the workflow fails, the release stays without a zip and no site updates: see the **Actions** tab for the reason.
-4. **Test first:** tick **Set as a pre-release** to try a release on the test site before the live portal gets it. Only sites with **Also install pre-releases** turned on install it. When it's ready, edit the release, untick pre-release, and save.
-5. **Rebuild a zip:** to rebuild the zip for an existing release, go to **Actions › Release › Run workflow** and enter its tag.
+1. Change the version with `scripts/bump-version.sh 0.3.0`, along with the changes (including the compiled `plugin/` files from `npm run build`).
+2. Merge the change into `main`.
+
+The **Release** workflow then:
+- sees a plugin version that has no release yet;
+- checks the PHP syntax;
+- rebuilds the interface and confirms it matches what's committed;
+- creates release `v0.3.0` from that commit, with `boxing-canada-portal.zip` attached and notes generated from the merged pull requests.
+
+Changes merged without a version change don't create a release. If the workflow fails, nothing is published, and the **Actions** tab shows why.
+
+- **Test first:** a version with a hyphen, such as `0.3.0-beta.1`, becomes a pre-release. Only sites with **Also install pre-releases** turned on install it.
+- **By hand (optional):** a release published in GitHub's interface also gets its zip attached, but only if its tag matches the plugin version of the commit it points at. Otherwise it stays without a zip, and sites ignore it.
 
 **Rolling back:** download the previous release's zip from GitHub and upload it under **Plugins › Add New › Upload Plugin**, choosing **Replace current with uploaded**. Turn off automatic updates until the fix is released.
