@@ -176,20 +176,19 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
 
 ### Publishing a release
 
-1. Run `scripts/bump-version.sh 0.3.0` on a branch. Commit it with the changes (including the compiled `plugin/` files from `npm run build`), and merge the pull request.
-2. Tag the merge on `main` and push the tag:
-
-   ```
-   git tag v0.3.0
-   git push origin v0.3.0
-   ```
-
-   The **Release** workflow then:
+1. On a branch, run `scripts/bump-version.sh 0.3.0`. Commit it with the changes (including the compiled `plugin/` files from `npm run build`), and merge the pull request into `main`.
+2. On GitHub, go to **Releases › Draft a new release**:
+   - Choose a new tag `v0.3.0` (it must match the version), targeting `main`.
+   - Click **Generate release notes**.
+   - Click **Publish release**.
+3. The **Release** workflow runs within a minute. It:
    - checks that the tag matches the plugin version;
    - checks the PHP syntax;
    - rebuilds the interface and confirms it matches what's committed;
-   - builds `boxing-canada-portal.zip`;
-   - publishes the GitHub release with notes generated from the merged pull requests.
-3. **Test first:** to try a release on the test site before the live portal gets it, use a pre-release tag such as `v0.3.0-beta.1`. Only sites with **Also install pre-releases** turned on install it. When it's ready, publish `v0.3.0`.
+   - attaches `boxing-canada-portal.zip` to the release.
+
+   Sites install the release only once the zip is attached. If the workflow fails, the release stays without a zip and no site updates: see the **Actions** tab for the reason.
+4. **Test first:** tick **Set as a pre-release** to try a release on the test site before the live portal gets it. Only sites with **Also install pre-releases** turned on install it. When it's ready, edit the release, untick pre-release, and save.
+5. **Rebuild a zip:** to rebuild the zip for an existing release, go to **Actions › Release › Run workflow** and enter its tag.
 
 **Rolling back:** download the previous release's zip from GitHub and upload it under **Plugins › Add New › Upload Plugin**, choosing **Replace current with uploaded**. Turn off automatic updates until the fix is released.

@@ -44,9 +44,9 @@ python3 tests/ui_test.py     # needs Playwright: walks the evaluation flow as ad
 Sites running the plugin update themselves from this repository's GitHub releases.
 
 1. Bump the version with `scripts/bump-version.sh X.Y.Z` and merge the change to `main`.
-2. Push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+2. On GitHub, publish a release with the new tag `vX.Y.Z` on `main`.
 
-The **Release** workflow checks and builds the plugin, then publishes the release with `boxing-canada-portal.zip` attached. Tags with a hyphen, such as `v0.3.0-beta.1`, become pre-releases, which only test sites install. The **CI** workflow runs the same checks on every pull request.
+The **Release** workflow then checks and builds the plugin, and attaches `boxing-canada-portal.zip` to the release. Releases marked as pre-releases are only installed by test sites. The **CI** workflow runs the same checks on every pull request.
 
 Details are in section 7 of [`INSTALL.md`](plugin/boxing-canada-portal/INSTALL.md).
 

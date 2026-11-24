@@ -1,30 +1,45 @@
-# Publishes a plugin release when a version tag is pushed (for example v0.3.0).
-# Portals running the plugin pick the release up as a WordPress update.
-# Tags with a hyphen (v0.3.0-beta.1) become pre-releases, which only sites with
-# "Also install pre-releases" turned on will install.
+# Builds boxing-canada-portal.zip and attaches it to a GitHub release.
+#
+# Runs when a release is published (Releases › Draft a new release › choose a
+# tag such as v0.3.0 on main › Publish). Portals pick up the release as a
+# WordPress update once the zip is attached, usually a few minutes later.
+# Releases marked "Set as a pre-release" are only installed by sites that
+# follow pre-releases (a test site).
+#
+# To rebuild the zip for an existing release: Actions › Release › Run workflow,
+# and enter its tag.
 name: Release
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build and attach the zip to (for example v0.2.1)'
+        required: true
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
 
       - name: Check the tag matches the plugin version
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
+          WANT="${TAG#v}"
           HEADER=$(grep -m1 -E '^\s*\*\s*Version:' plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E 's/.*Version:\s*//')
           CONST=$(grep -m1 "define( 'BCP_VERSION'" plugin/boxing-canada-portal/boxing-canada-portal.php | sed -E "s/.*'BCP_VERSION', '([^']+)'.*/\1/")
           echo "tag=$TAG header=$HEADER constant=$CONST"
-          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$CONST" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME doesn't match the plugin version ($HEADER / $CONST). Run scripts/bump-version.sh first."
+          if [ "$WANT" != "$HEADER" ] || [ "$WANT" != "$CONST" ]; then
+            echo "::error::Release $TAG points at code whose plugin version is $HEADER. Run scripts/bump-version.sh ${WANT}, merge it to main, and create the release from that commit."
             exit 1
           fi
 
@@ -50,10 +65,7 @@ jobs:
       - name: Build the plugin zip
         run: scripts/build-zip.sh
 
-      - name: Publish the release
+      - name: Attach the zip to the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          PRE=""
-          case "$GITHUB_REF_NAME" in *-*) PRE="--prerelease" ;; esac
-          gh release create "$GITHUB_REF_NAME" dist/boxing-canada-portal.zip --title "Boxing Canada Portal $GITHUB_REF_NAME" --generate-notes $PRE
+        run: gh release upload "$TAG" dist/boxing-canada-portal.zip --clobber
