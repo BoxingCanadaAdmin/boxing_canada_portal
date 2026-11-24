@@ -311,7 +311,7 @@ class BCP_Coach_Eval {
 			}
 			if ( ! $ok ) {
 				$intake['status']  = 'ignored';
-				$intake['notes'][] = 'Not from an allowed sender (see Tools › Boxing Canada Portal). Kept for review, no request created.';
+				$intake['notes'][] = 'Not from an allowed sender (see Boxing Canada › Settings). Kept for review, no request created.';
 				BCP_Store::put( 's_evalIntake', $id, $intake );
 				return array( 'intake' => $intake, 'request' => null );
 			}

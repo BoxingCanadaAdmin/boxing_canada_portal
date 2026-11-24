@@ -2,7 +2,7 @@
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 License: GPLv2 or later
 
 The Boxing Canada National Portal as a WordPress plugin: Digital Record Books, Annual Medicals, ringside checks, pre-bout forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport.
@@ -15,11 +15,15 @@ The portal runs full-screen on its own page (it does not use the theme), and kee
 
 1. Plugins › Add New › Upload Plugin, choose boxing-canada-portal.zip, then Activate.
 2. On first activation the plugin creates a "Portal" page and loads the fictional demo data, with demo sign-in accounts (password Password123!).
-3. Open Tools › Boxing Canada Portal to change settings, load or clear data, and download backups.
+3. Open Boxing Canada › Settings to change settings, load or clear data, and download backups.
 
 Full instructions are in INSTALL.md inside the plugin folder.
 
 == Changelog ==
+
+= 0.2.4 =
+* "Boxing Canada" in the WordPress sidebar, with a boxing glove icon: Settings (moved from Tools) and Open the portal. Old Tools links redirect.
+* The Coach evaluations settings (Square inbound email address, allowed senders, evaluation From and Cc addresses) now appear on the settings page.
 
 = 0.2.3 =
 * Same as 0.2.2 (installs its own updates on managed hosting; Plugins-screen update links). The v0.2.2 release on GitHub was created before those changes were merged, so they ship as 0.2.3.

@@ -245,7 +245,7 @@ class BCP_REST {
 			$wp  = get_user_by( is_email( $login ) ? 'email' : 'login', $login );
 			$doc = $wp ? BCP_Accounts::portal_user_for_wp( $wp->ID ) : null;
 			if ( $wp && ! $doc && wp_check_password( $pass, $wp->user_pass, $wp->ID ) ) {
-				return self::err( 'bcp_not_linked', 'This WordPress account isn’t linked to a portal member. An administrator can link it under Tools › Boxing Canada Portal.', 403 );
+				return self::err( 'bcp_not_linked', 'This WordPress account isn’t linked to a portal member. An administrator can link it under Boxing Canada › Settings.', 403 );
 			}
 		}
 		if ( ! $doc || ! $wp || ! wp_check_password( $pass, $wp->user_pass, $wp->ID ) ) {
