@@ -42,6 +42,40 @@ class BCP_Updater {
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'after_update' ), 10, 2 );
 		add_action( self::HOOK, array( __CLASS__, 'self_update' ) );
 		add_action( 'init', array( __CLASS__, 'schedule' ) );
+		add_filter( 'plugin_row_meta', array( __CLASS__, 'row_links' ), 10, 2 );
+		add_action( 'admin_post_bcp_updates', array( __CLASS__, 'row_action' ) );
+	}
+
+	/** "Check for updates | Auto-update: on (Turn off)" on the Plugins screen. */
+	public static function row_links( $links, $file ) {
+		if ( self::basename() !== $file || ! current_user_can( 'update_plugins' ) ) {
+			return $links;
+		}
+		$s   = BCP_Plugin::settings();
+		$on  = ! empty( $s['auto_update'] );
+		$url = function ( $do ) {
+			return wp_nonce_url( admin_url( 'admin-post.php?action=bcp_updates&do=' . $do ), 'bcp_updates' );
+		};
+		$links[] = '<a href="' . esc_url( $url( 'check' ) ) . '">Check for updates</a>';
+		$links[] = $on
+			? '<span style="color:#1d7a3a;font-weight:600">Auto-update: on</span> (<a href="' . esc_url( $url( 'auto_off' ) ) . '">Turn off</a>)'
+			: '<span style="font-weight:600">Auto-update: off</span> (<a href="' . esc_url( $url( 'auto_on' ) ) . '">Turn on</a>)';
+		return $links;
+	}
+
+	public static function row_action() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			wp_die( 'Not allowed.' );
+		}
+		check_admin_referer( 'bcp_updates' );
+		$do = isset( $_GET['do'] ) ? sanitize_key( $_GET['do'] ) : '';
+		if ( 'auto_on' === $do || 'auto_off' === $do ) {
+			BCP_Plugin::update_settings( array( 'auto_update' => 'auto_on' === $do ? 1 : 0 ) );
+		} else {
+			self::check_now();
+		}
+		wp_safe_redirect( admin_url( 'plugins.php' ) );
+		exit;
 	}
 
 	public static function schedule() {

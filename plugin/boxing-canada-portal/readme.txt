@@ -23,6 +23,7 @@ Full instructions are in INSTALL.md inside the plugin folder.
 
 = 0.2.2 =
 * Automatic updates also work on managed hosting that switches WordPress's background updater off: the portal installs its own releases twice a day. New "Update now" button and a list of what affects updates on the site.
+* Plugins screen: "Check for updates" and "Auto-update: on (Turn off)" links on the portal's row.
 
 = 0.2.1 =
 * Updates from GitHub: new releases of BoxingCanadaAdmin/boxing_canada_portal appear as WordPress updates and install automatically (can be turned off; optional pre-release channel for test sites).

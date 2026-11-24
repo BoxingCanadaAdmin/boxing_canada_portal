@@ -166,6 +166,7 @@ The starting pathway ships in `data/coach-pathway.json`. The Locker match phrase
   - **Install new releases automatically** is on by default. WordPress checks twice a day and installs in the background, using real cron if the host provides it.
   - **Also install pre-releases** is for the test site only. Pre-releases have tags like `v0.3.0-beta.1`.
   - **Check GitHub now** checks straight away.
+  - The same controls are on the **Plugins** screen, on the portal's row: **Check for updates**, and **Auto-update: on (Turn off)**. The Automatic Updates column shows plain "Auto-updates enabled" because the portal manages this setting itself.
 - **Managed hosting:** many managed hosts switch WordPress's background updater off for plugins. When the background updater is off, the portal installs its own releases: a scheduled task checks twice a day and runs WordPress's plugin updater, using the same lock as WordPress so the two never run at the same time.
   - Administrators get a portal notification after each update, or after a failure.
   - **Update now** on the settings screen installs a waiting release straight away.
