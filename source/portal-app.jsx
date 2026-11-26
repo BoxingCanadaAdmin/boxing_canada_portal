@@ -199,7 +199,8 @@ function blankSanction(user, prov) {
       region: '', club: '', eventName: '', posterName: '', posterData: '', date: '', firstBoutTime: '13:00',
       venueName: '', venueAddress: '', hostName: user ? fullName(user) : '', hostPhone: '', hostEmail: user?.email || '',
       hospital: '', hospitalKm: '', livestreamUrl: '', scatRequired: false, scatWithinDays: 30, anticipated: '8', overExplanation: '', international: false, ringSupplier: '', gloveRental: false,
-      physician: { name: '', license: '', phone: '', email: '' }, weightClasses: []
+      physician: { name: '', license: '', phone: '', email: '' }, weightClasses: [],
+      useTournamentApp: false, rings: '1', endDate: ''
     },
     office: { resultsName: '', injuries: '', injuryReportName: '', additional: '' }
   };
@@ -1962,6 +1963,14 @@ function SanctionWizardModal({ initial, onClose, startStep = 1 }) {
             <Field label="Email"><input type="email" className="field" readOnly={ro} value={s.info.physician.email} onChange={e => setPhys('email', e.target.value)} /></Field>
           </div></div>
         <div><h4 className="mb-2 font-display text-lg font-bold">Contested categories & weights</h4><WeightPicker disabled={ro} value={s.info.weightClasses} onChange={v => setI('weightClasses', v)} /></div>
+        <div><h4 className="mb-2 font-display text-lg font-bold">Tournament software</h4>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Run this event with Boxing Canada's integrated tournament software?" className="sm:col-span-3" hint="When the request is approved, the event is created in the tournament software from this request, sized to it: a one-day, one-ring show of up to 12 bouts gets the simplified interface. You become its organizer and get an email with the link. It handles boxers, bouts, the daily check (documents, blood pressure, medical, weigh-in), officials, live scoring and results."><YesNo disabled={ro} value={s.info.useTournamentApp ? 'yes' : 'no'} onChange={v => setI('useTournamentApp', v === 'yes')} /></Field>
+            {s.info.useTournamentApp && <>
+              <Field label="Rings"><select className="field" disabled={ro} value={s.info.rings || '1'} onChange={e => setI('rings', e.target.value)}>{['1', '2', '3', '4'].map(n => <option key={n} value={n}>{n}</option>)}</select></Field>
+              <Field label="Last day (events over several days only)" hint="Leave empty for a one-day event."><input type="date" className="field" readOnly={ro} min={s.info.date || undefined} value={s.info.endDate || ''} onChange={e => setI('endDate', e.target.value)} /></Field>
+            </>}
+          </div></div>
         <div className="rounded-md border-2 border-dashed border-line p-3">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2"><h4 className="font-display text-lg font-bold">Office use only</h4>{officeEditable ? <Btn size="sm" variant="rope" onClick={saveOffice}>Save office use section</Btn> : <Badge>Completed by PTSO or Boxing Canada administrators</Badge>}</div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -2007,7 +2016,7 @@ function SanctionSystemView() {
       const phys = d.users.find(u => u.role === 'medical' && x.info.physician.name.includes(u.lastName));
       d.events.push({ id: evId, name: x.info.eventName, province: x.province, date: x.info.date, firstPreBoutCheckDateTime: x.info.date + 'T' + pre, firstBoutTime: x.info.firstBoutTime, location: `${x.info.venueName}, ${x.info.venueAddress}`, livestreamUrl: x.info.livestreamUrl ? normUrl(x.info.livestreamUrl.trim()) : '', scatRequired: !!x.info.scatRequired, scatWithinDays: Number(x.info.scatWithinDays) || 30, weightClasses: x.info.weightClasses.slice(), registeredBoxerIds: [], officials: [], physicianIds: phys ? [phys.id] : [], bouts: [], sanctionId: x.id });
     });
-    notify(`Sanction approved. “${s.info.eventName}” is now a Competition Event.`, 'ok', { label: 'Open event', fn: () => go('EVENTS', { focusEventId: evId }) });
+    notify(s.info.useTournamentApp ? `Sanction approved. “${s.info.eventName}” is now a Competition Event, and it is being set up in the tournament software (the organizer gets an email with the link).` : `Sanction approved. “${s.info.eventName}” is now a Competition Event.`, 'ok', { label: 'Open event', fn: () => go('EVENTS', { focusEventId: evId }) });
   };
   const counts = { all: visible.length, submitted: visible.filter(s => s.status === 'submitted').length, approved: visible.filter(s => s.status === 'approved').length, denied: visible.filter(s => s.status === 'denied').length, draft: visible.filter(s => s.status === 'draft').length };
   return <div className="space-y-4">
@@ -2020,11 +2029,12 @@ function SanctionSystemView() {
           <Td className="font-semibold">{s.info.eventName || 'Untitled request'}<div className="text-xs font-normal text-muted">{s.info.club || '—'}</div></Td>
           <Td><Badge tone={s.type === 'NSO' ? 'bad' : 'info'}>{s.type === 'NSO' ? '🍁 NSO' : 'PTSO'}</Badge></Td><Td>{s.province}</Td><Td className="whitespace-nowrap">{fmtDate(s.info.date)}</Td>
           <Td>{u ? <><span aria-hidden="true">{ROLES[u.role].emoji}</span> {fullName(u)}</> : '—'}</Td>
-          <Td><SanctionStatus s={s} />{s.status === 'submitted' && s.type === 'NSO' && viewer.role === 'ptso' && <div className="mt-1 text-xs text-muted">Awaiting Boxing Canada</div>}</Td>
+          <Td><SanctionStatus s={s} />{s.status === 'submitted' && s.type === 'NSO' && viewer.role === 'ptso' && <div className="mt-1 text-xs text-muted">Awaiting Boxing Canada</div>}{s.info.useTournamentApp && <div className="mt-1 text-xs text-muted">{s.tournamentUrl ? 'Set up in the tournament software' : 'Tournament software requested'}</div>}{admin && s.tournamentNote && <div className="mt-1 text-xs text-maple">{s.tournamentNote}</div>}</Td>
           <Td><div className="flex flex-wrap justify-end gap-1.5">
             <Btn size="sm" onClick={() => setWizard(s)}>{s.status === 'draft' && s.requestedByUserId === viewer.id ? 'Continue' : 'Inspect'}</Btn>
             {canApprove(s) && <><Btn size="sm" variant="ok" onClick={() => approve(s)}>Approve & Create Event</Btn><Btn size="sm" variant="danger" onClick={() => setDeny(s)}>Deny</Btn></>}
             {s.status === 'approved' && s.eventId && <Btn size="sm" variant="rope" onClick={() => go('EVENTS', { focusEventId: s.eventId })}>Open Event</Btn>}
+            {s.tournamentUrl && <a className="inline-flex items-center rounded-md border border-maple px-2.5 py-1 text-xs font-semibold text-maple hover:bg-maple hover:text-white" href={s.tournamentUrl} target="_blank" rel="noopener">Open in the Tournament App</a>}
           </div></Td></tr>; })}
       </Table>
     </Section>

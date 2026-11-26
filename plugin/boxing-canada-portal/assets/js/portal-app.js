@@ -195,7 +195,8 @@ function blankSanction(user, prov) {
             region: '', club: '', eventName: '', posterName: '', posterData: '', date: '', firstBoutTime: '13:00',
             venueName: '', venueAddress: '', hostName: user ? fullName(user) : '', hostPhone: '', hostEmail: (user === null || user === void 0 ? void 0 : user.email) || '',
             hospital: '', hospitalKm: '', livestreamUrl: '', scatRequired: false, scatWithinDays: 30, anticipated: '8', overExplanation: '', international: false, ringSupplier: '', gloveRental: false,
-            physician: { name: '', license: '', phone: '', email: '' }, weightClasses: []
+            physician: { name: '', license: '', phone: '', email: '' }, weightClasses: [],
+            useTournamentApp: false, rings: '1', endDate: ''
         },
         office: { resultsName: '', injuries: '', injuryReportName: '', additional: '' }
     };
@@ -2835,6 +2836,16 @@ function SanctionWizardModal({ initial, onClose, startStep = 1 }) {
                 React.createElement("div", null,
                     React.createElement("h4", { className: "mb-2 font-display text-lg font-bold" }, "Contested categories & weights"),
                     React.createElement(WeightPicker, { disabled: ro, value: s.info.weightClasses, onChange: v => setI('weightClasses', v) })),
+                React.createElement("div", null,
+                    React.createElement("h4", { className: "mb-2 font-display text-lg font-bold" }, "Tournament software"),
+                    React.createElement("div", { className: "grid gap-3 sm:grid-cols-3" },
+                        React.createElement(Field, { label: "Run this event with Boxing Canada's integrated tournament software?", className: "sm:col-span-3", hint: "When the request is approved, the event is created in the tournament software from this request, sized to it: a one-day, one-ring show of up to 12 bouts gets the simplified interface. You become its organizer and get an email with the link. It handles boxers, bouts, the daily check (documents, blood pressure, medical, weigh-in), officials, live scoring and results." },
+                            React.createElement(YesNo, { disabled: ro, value: s.info.useTournamentApp ? 'yes' : 'no', onChange: v => setI('useTournamentApp', v === 'yes') })),
+                        s.info.useTournamentApp && React.createElement(React.Fragment, null,
+                            React.createElement(Field, { label: "Rings" },
+                                React.createElement("select", { className: "field", disabled: ro, value: s.info.rings || '1', onChange: e => setI('rings', e.target.value) }, ['1', '2', '3', '4'].map(n => React.createElement("option", { key: n, value: n }, n)))),
+                            React.createElement(Field, { label: "Last day (events over several days only)", hint: "Leave empty for a one-day event." },
+                                React.createElement("input", { type: "date", className: "field", readOnly: ro, min: s.info.date || undefined, value: s.info.endDate || '', onChange: e => setI('endDate', e.target.value) }))))),
                 React.createElement("div", { className: "rounded-md border-2 border-dashed border-line p-3" },
                     React.createElement("div", { className: "mb-2 flex flex-wrap items-center justify-between gap-2" },
                         React.createElement("h4", { className: "font-display text-lg font-bold" }, "Office use only"),
@@ -2899,7 +2910,7 @@ function SanctionSystemView() {
             const phys = d.users.find(u => u.role === 'medical' && x.info.physician.name.includes(u.lastName));
             d.events.push({ id: evId, name: x.info.eventName, province: x.province, date: x.info.date, firstPreBoutCheckDateTime: x.info.date + 'T' + pre, firstBoutTime: x.info.firstBoutTime, location: `${x.info.venueName}, ${x.info.venueAddress}`, livestreamUrl: x.info.livestreamUrl ? normUrl(x.info.livestreamUrl.trim()) : '', scatRequired: !!x.info.scatRequired, scatWithinDays: Number(x.info.scatWithinDays) || 30, weightClasses: x.info.weightClasses.slice(), registeredBoxerIds: [], officials: [], physicianIds: phys ? [phys.id] : [], bouts: [], sanctionId: x.id });
         });
-        notify(`Sanction approved. “${s.info.eventName}” is now a Competition Event.`, 'ok', { label: 'Open event', fn: () => go('EVENTS', { focusEventId: evId }) });
+        notify(s.info.useTournamentApp ? `Sanction approved. “${s.info.eventName}” is now a Competition Event, and it is being set up in the tournament software (the organizer gets an email with the link).` : `Sanction approved. “${s.info.eventName}” is now a Competition Event.`, 'ok', { label: 'Open event', fn: () => go('EVENTS', { focusEventId: evId }) });
     };
     const counts = { all: visible.length, submitted: visible.filter(s => s.status === 'submitted').length, approved: visible.filter(s => s.status === 'approved').length, denied: visible.filter(s => s.status === 'denied').length, draft: visible.filter(s => s.status === 'draft').length };
     return React.createElement("div", { className: "space-y-4" },
@@ -2927,14 +2938,17 @@ function SanctionSystemView() {
                         fullName(u)) : '—'),
                     React.createElement(Td, null,
                         React.createElement(SanctionStatus, { s: s }),
-                        s.status === 'submitted' && s.type === 'NSO' && viewer.role === 'ptso' && React.createElement("div", { className: "mt-1 text-xs text-muted" }, "Awaiting Boxing Canada")),
+                        s.status === 'submitted' && s.type === 'NSO' && viewer.role === 'ptso' && React.createElement("div", { className: "mt-1 text-xs text-muted" }, "Awaiting Boxing Canada"),
+                        s.info.useTournamentApp && React.createElement("div", { className: "mt-1 text-xs text-muted" }, s.tournamentUrl ? 'Set up in the tournament software' : 'Tournament software requested'),
+                        admin && s.tournamentNote && React.createElement("div", { className: "mt-1 text-xs text-maple" }, s.tournamentNote)),
                     React.createElement(Td, null,
                         React.createElement("div", { className: "flex flex-wrap justify-end gap-1.5" },
                             React.createElement(Btn, { size: "sm", onClick: () => setWizard(s) }, s.status === 'draft' && s.requestedByUserId === viewer.id ? 'Continue' : 'Inspect'),
                             canApprove(s) && React.createElement(React.Fragment, null,
                                 React.createElement(Btn, { size: "sm", variant: "ok", onClick: () => approve(s) }, "Approve & Create Event"),
                                 React.createElement(Btn, { size: "sm", variant: "danger", onClick: () => setDeny(s) }, "Deny")),
-                            s.status === 'approved' && s.eventId && React.createElement(Btn, { size: "sm", variant: "rope", onClick: () => go('EVENTS', { focusEventId: s.eventId }) }, "Open Event"))));
+                            s.status === 'approved' && s.eventId && React.createElement(Btn, { size: "sm", variant: "rope", onClick: () => go('EVENTS', { focusEventId: s.eventId }) }, "Open Event"),
+                            s.tournamentUrl && React.createElement("a", { className: "inline-flex items-center rounded-md border border-maple px-2.5 py-1 text-xs font-semibold text-maple hover:bg-maple hover:text-white", href: s.tournamentUrl, target: "_blank", rel: "noopener" }, "Open in the Tournament App"))));
             }))),
         admin && React.createElement(ClassRequestsSection, null),
         wizard && React.createElement(SanctionWizardModal, { key: wizard.id, initial: wizard, onClose: () => setWizard(null) }),
