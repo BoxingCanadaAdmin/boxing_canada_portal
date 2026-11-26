@@ -1,6 +1,6 @@
 # Boxing Canada Portal: installation and operation
 
-Version 0.2.5
+Version 0.2.6
 
 ## What this plugin does
 

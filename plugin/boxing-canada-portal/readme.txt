@@ -2,7 +2,7 @@
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.2.5
+Stable tag: 0.2.6
 License: GPLv2 or later
 
 The Boxing Canada National Portal as a WordPress plugin: Digital Record Books, Annual Medicals, ringside checks, pre-bout forms, sanctions, events, travel passes, coach relationships, club managers, certification and Safe Sport.
@@ -20,6 +20,9 @@ The portal runs full-screen on its own page (it does not use the theme), and kee
 Full instructions are in INSTALL.md inside the plugin folder.
 
 == Changelog ==
+
+= 0.2.6 =
+* Sanction application: new "Tournament software" question (with rings and the last day of a multi-day event). When an approved request asked for it, the Boxing Canada Tournament App (same website) creates the event from the request and makes the applicant its organizer; the request then shows "Open in the Tournament App".
 
 = 0.2.5 =
 * Square order emails: tuned to Square's real layout (French and English). Reads the chosen level instead of the levels named in the product description, takes the buyer's name from the subject, and ignores orders for other products (new "Evaluation product name" setting).
